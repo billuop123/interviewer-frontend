@@ -41,7 +41,7 @@ export const Interview = function () {
   const chunksRef = useRef<Blob[]>([])
   const recognitionRef = useRef<any>(null)
   const audioRef = useRef<HTMLAudioElement | null>(null)
-  const silenceTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const silenceTimeoutRef = useRef<number | null>(null)
   const micEnabledRef = useRef<boolean>(false)
 
   // Fetch resume content and check existing results when component mounts
@@ -235,7 +235,7 @@ export const Interview = function () {
       if (hasFinalResult && currentTranscript.trim()) {
         // Reset silence timer
         if (silenceTimeoutRef.current) clearTimeout(silenceTimeoutRef.current)
-        silenceTimeoutRef.current = setTimeout(() => {
+        silenceTimeoutRef.current = window.window.setTimeout(() => {
           // Get the current full transcript for sending
           setTranscript(fullTranscript => {
             if (fullTranscript.trim() && micEnabledRef.current && !isInterviewerSpeaking && !isLoading) {
@@ -256,7 +256,7 @@ export const Interview = function () {
       
       // Handle specific errors
       if (event.error === 'no-speech') {
-        setTimeout(() => {
+        window.setTimeout(() => {
           if (interviewStarted && micEnabledRef.current && !isInterviewerSpeaking && !isLoading) {
             startSpeechRecognition()
           }
@@ -274,7 +274,7 @@ export const Interview = function () {
       
       // Restart recognition after a short delay for recoverable errors
       if (event.error === 'no-speech' || event.error === 'aborted') {
-        setTimeout(() => {
+        window.setTimeout(() => {
           if (interviewStarted && micEnabledRef.current && !isInterviewerSpeaking && !isLoading) {
             startSpeechRecognition()
           }
@@ -285,7 +285,7 @@ export const Interview = function () {
     recognition.onend = () => {
       // Restart recognition if interview is still active and mic is enabled and not processing
       if (interviewStarted && micEnabledRef.current && !isInterviewerSpeaking && !isLoading) {
-        setTimeout(() => {
+        window.setTimeout(() => {
           startSpeechRecognition(false) // Don't clear transcript when auto-restarting
         }, 100) // Very fast restart
       }
@@ -309,7 +309,7 @@ export const Interview = function () {
         clearTimeout(silenceTimeoutRef.current)
       }
       // Immediate restart for faster response
-      setTimeout(() => {
+      window.setTimeout(() => {
         if (interviewStarted && micEnabledRef.current && !isInterviewerSpeaking && !isLoading) {
           startSpeechRecognition(false) // Don't clear transcript when restarting
         }
@@ -346,7 +346,7 @@ export const Interview = function () {
       micEnabledRef.current = true
       
       // Start speech recognition after state update
-      setTimeout(() => {
+      window.setTimeout(() => {
         startSpeechRecognition()
       }, 100)
       
