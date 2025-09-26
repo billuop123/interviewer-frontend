@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { BACKEND_URL, getToken } from "../config"
-import { useUser } from "../contexts/userContext"
 import toast from "react-hot-toast"
 import { 
   Play, 
