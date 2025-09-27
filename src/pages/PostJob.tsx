@@ -193,9 +193,14 @@ export const PostJob = function () {
         },
       })
       
+      console.log('Job posting response:', response.status, response.data)
+      
       if (response.status === 201) {
         toast.success("Job posted successfully! 🎉")
-        navigate(-1) // Go back to previous page
+        // Small delay to show the toast before navigating
+        setTimeout(() => {
+          navigate(-1) // Go back to previous page
+        }, 1000)
       }
     } catch (error: any) {
       console.error("Error posting job:", error)
@@ -228,7 +233,7 @@ export const PostJob = function () {
     <div className="fixed inset-0 w-full h-full bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-black dark:to-gray-800 overflow-auto">
       {/* Background Animation */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-blue-200/20 to-purple-400/20 dark:from-blue-700/20 dark:to-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-blue-200/20 to-indigo-400/20 dark:from-blue-700/20 dark:to-indigo-500/20 rounded-full blur-3xl animate-pulse"></div>
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-green-300/15 to-blue-200/15 dark:from-green-600/15 dark:to-blue-700/15 rounded-full blur-3xl animate-pulse"></div>
       </div>
 

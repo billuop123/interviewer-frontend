@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import axios from "axios"
 import { Link, useNavigate } from "react-router-dom"
 import { BACKEND_URL, getToken } from "../config"
@@ -20,55 +20,60 @@ interface Company {
 
 export const MyCompanies = function () {
   const navigate = useNavigate()
-  const { user } = useUser()
+  const { user, loading: userLoading } = useUser()
   const [companies, setCompanies] = useState<Company[]>([])
   const [loading, setLoading] = useState<boolean>(true)
-  const [fetched, setFetched] = useState<boolean>(false)
-
-  useEffect(() => {
-    if (user.userId && !fetched) {
-      fetchUserCompanies()
-    }
-  }, [user.userId, fetched])
-
-  useEffect(() => {
-  }, [companies])
+  const hasFetched = useRef(false)
 
   const fetchUserCompanies = async () => {
-    if (fetched) return; // Prevent multiple requests
+    if (hasFetched.current) return; // Prevent multiple requests
     
     try {
       setLoading(true)
+      hasFetched.current = true
       
       if (!user.userId) {
-        console.error("User ID is not available")
         setLoading(false)
         return
       }
       
       const token = getToken()
       if (!token) {
-        console.error("No auth token available")
         setLoading(false)
         return
       }
       
-      const response = await axios.get(`${BACKEND_URL}/company?userId=${user.userId}`, {
+      const response = await axios.get(`${BACKEND_URL}/company`, {
         headers: {
           Authorization: token,
         },
       })
+      
       setCompanies(response.data || [])
-      setFetched(true)
     } catch (error) {
-      console.error("Error fetching user companies:", error)
+      hasFetched.current = false // Reset on error
     } finally {
       setLoading(false)
     }
   }
 
+  useEffect(() => {
+    // Wait for UserContext to finish loading
+    if (userLoading) {
+      return
+    }
+    
+    if (user.userId && !hasFetched.current) {
+      fetchUserCompanies()
+    } else if (!user.userId) {
+      setLoading(false) // Stop loading if no user
+    }
+  }, [user.userId, userLoading])
+
+  // Removed empty useEffect that was causing infinite loop
+
   const refreshCompanies = () => {
-    setFetched(false)
+    hasFetched.current = false
     setCompanies([])
     if (user.userId) {
       fetchUserCompanies()
@@ -93,14 +98,15 @@ export const MyCompanies = function () {
   }
 
 
-  if (loading || !user.userId) {
+
+  if (loading) {
     return (
       <div className="fixed inset-0 w-full h-full bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-black dark:to-gray-800 overflow-auto">
         <div className="flex items-center justify-center min-h-full">
           <div className="text-center">
             <div className="w-12 h-12 border-4 border-gray-300 dark:border-gray-600 border-t-gray-600 dark:border-t-gray-300 rounded-full animate-spin mx-auto mb-4"></div>
             <p className="text-lg text-gray-600 dark:text-gray-400">
-              {!user.userId ? "Loading user information..." : "Loading your companies..."}
+              Loading your companies...
             </p>
           </div>
         </div>
@@ -112,7 +118,7 @@ export const MyCompanies = function () {
     <div className="fixed inset-0 w-full h-full bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-black dark:to-gray-800 overflow-auto">
       {/* Background Animation */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-blue-200/20 to-purple-400/20 dark:from-blue-700/20 dark:to-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-blue-200/20 to-indigo-400/20 dark:from-blue-700/20 dark:to-indigo-500/20 rounded-full blur-3xl animate-pulse"></div>
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-green-300/15 to-blue-200/15 dark:from-green-600/15 dark:to-blue-700/15 rounded-full blur-3xl animate-pulse"></div>
       </div>
 
@@ -131,7 +137,7 @@ export const MyCompanies = function () {
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
               <div>
                 <div className="flex items-center gap-4 mb-4">
-                  <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
+                  <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
                     <Building2 className="w-8 h-8 text-white" />
                   </div>
                   <div>
@@ -286,7 +292,7 @@ export const MyCompanies = function () {
                       <div className="flex flex-wrap gap-3">
                         <Link 
                           to={`/company/${company.id}/jobs`}
-                          className="flex items-center gap-2 px-4 py-2 bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded-lg font-medium transition-colors duration-200"
+                          className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors duration-200"
                         >
                           <Eye className="w-4 h-4" />
                           View Jobs
@@ -294,7 +300,7 @@ export const MyCompanies = function () {
                         
                         <Link 
                           to={`/company/${company.id}/post-job`}
-                          className="flex items-center gap-2 px-4 py-2 bg-green-100 hover:bg-green-200 dark:bg-green-900/30 dark:hover:bg-green-900/50 text-green-700 dark:text-green-300 rounded-lg font-medium transition-colors duration-200"
+                          className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors duration-200"
                         >
                           <Plus className="w-4 h-4" />
                           Post New Job
@@ -302,7 +308,7 @@ export const MyCompanies = function () {
                         
                         <button
                           onClick={() => navigate(`/company/${company.id}/edit`)}
-                          className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium transition-colors duration-200"
+                          className="flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors duration-200"
                         >
                           <Edit className="w-4 h-4" />
                           Edit Company
@@ -310,7 +316,7 @@ export const MyCompanies = function () {
                         
                         <button
                           onClick={() => handleDeleteCompany(company.id)}
-                          className="flex items-center gap-2 px-4 py-2 bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-700 dark:text-red-300 rounded-lg font-medium transition-colors duration-200"
+                          className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors duration-200"
                         >
                           <Trash2 className="w-4 h-4" />
                           Delete Company

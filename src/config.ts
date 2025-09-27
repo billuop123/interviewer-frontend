@@ -7,6 +7,13 @@ export function getToken(){
     }
     return token
 }
+export function getTokenOrThrow(){
+    const token = sessionStorage.getItem("auth_token")
+    if (!token) {
+        throw new Error("No authentication token found")
+    }
+    return token
+}
 
 export function isAuthenticated(){
     return !!getToken()

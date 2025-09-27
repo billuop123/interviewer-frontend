@@ -85,7 +85,7 @@ export const NotFound = function () {
                 onClick={() => navigate('/my-companies')}
                 className="flex items-center gap-3 p-4 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border border-gray-200/60 dark:border-gray-700/60 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-800 transition-all duration-300 shadow-md hover:shadow-lg"
               >
-                <AlertCircle className="w-5 h-5 text-purple-500" />
+                <AlertCircle className="w-5 h-5 text-blue-500" />
                 <span className="font-medium">My Companies</span>
               </button>
             </div>

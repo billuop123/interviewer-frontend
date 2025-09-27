@@ -50,15 +50,19 @@ function UserProvider({ children }: UserProviderProps) {
 
       try {
         
-        // Validate token with backend
-        const response = await axios.get(`${BACKEND_URL}/users/profile`, {
+        // Validate token with backend - decode token to get userId
+        const tokenParts = token.split('.');
+        const payload = JSON.parse(atob(tokenParts[1]));
+        const userId = payload.userId;
+        
+        const response = await axios.get(`${BACKEND_URL}/users/${userId}`, {
           headers: {
             Authorization: token
           }
         });
 
-        if (response.data) {
-          const { name, email, role, id } = response.data;
+        if (response.data && response.data.result) {
+          const { name, email, role, id } = response.data.result;
           setUser({ 
             name: name || "", 
             email: email || "", 
@@ -67,9 +71,6 @@ function UserProvider({ children }: UserProviderProps) {
           });
         }
       } catch (error: any) {
-        console.error("❌ Token validation failed:", error);
-        console.error("Error response:", error.response?.data);
-        
         // Only clear token if it's actually invalid (401/403), not network errors
         if (error.response?.status === 401 || error.response?.status === 403) {
           logout();

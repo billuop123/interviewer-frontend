@@ -217,10 +217,18 @@ export const UserDetails = function () {
           'Content-Type': 'multipart/form-data',
         },
       })
-      setUserDetails(response.data)
       
-      toast.success("Profile updated successfully! 🎉")
-      setErrors([])
+      console.log('User details response:', response.status, response.data)
+      
+      if (response.status === 200) {
+        setUserDetails(response.data.result)
+        toast.success("Profile updated successfully! 🎉")
+        setErrors([])
+        // Small delay to show the toast before navigating
+        setTimeout(() => {
+          navigate('/dashboard')
+        }, 1000)
+      }
     } catch (error: any) {
       console.error("Error saving user details:", error)
       if (error.response?.data?.error) {
@@ -266,7 +274,7 @@ export const UserDetails = function () {
             </button>
             
             <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
                 <User className="w-8 h-8 text-white" />
               </div>
               <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">

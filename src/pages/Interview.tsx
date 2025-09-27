@@ -746,7 +746,7 @@ export const Interview = function () {
                       className={`flex items-center gap-2 px-6 py-3 rounded-lg transition-colors duration-200 ${
                         interviewResult 
                           ? 'bg-gray-400 cursor-not-allowed' 
-                          : 'bg-purple-600 hover:bg-purple-700'
+                          : 'bg-blue-600 hover:bg-blue-700'
                       } text-white`}
                     >
                       <Upload className="w-5 h-5" />
@@ -930,7 +930,7 @@ export const Interview = function () {
           
           <div className="flex items-center gap-2 px-4 py-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200 dark:border-gray-700 rounded-lg">
             <div className={`w-3 h-3 rounded-full ${
-              interviewResult ? 'bg-purple-500' :
+              interviewResult ? 'bg-blue-500' :
               isInterviewerSpeaking ? 'bg-blue-500' : 
               micEnabled ? 'bg-green-500' : 'bg-gray-400'
             }`}></div>
