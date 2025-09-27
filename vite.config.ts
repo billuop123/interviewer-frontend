@@ -10,9 +10,11 @@ export default defineConfig({
     assetsDir: 'assets',
   },
   server: {
-    historyApiFallback: true,
+    port: 3000,
+    open: true,
   },
   preview: {
-    historyApiFallback: true,
+    port: 4173,
+    open: true,
   }
 })
