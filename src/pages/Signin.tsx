@@ -1,6 +1,6 @@
 import React, { useState } from "react"
 import axios from "axios"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, Link } from "react-router-dom"
 import { BACKEND_URL } from "../config"
 import { useUser } from "../contexts/userContext"
 import toast from "react-hot-toast"
@@ -207,12 +207,12 @@ export const Signin = function() {
                             <div className="text-center pt-3 border-t border-gray-200/50 dark:border-gray-700/50">
                                 <p className="text-sm text-gray-600 dark:text-gray-400">
                                     Don't have an account?{" "}
-                                    <a 
-                                        href="/signup" 
+                                    <Link 
+                                        to="/signup" 
                                         className="font-semibold text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors duration-200 hover:underline underline-offset-4"
                                     >
                                         Sign up
-                                    </a>
+                                    </Link>
                                 </p>
                             </div>
                         </form>
