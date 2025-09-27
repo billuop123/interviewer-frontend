@@ -8,7 +8,8 @@ import {
   Square, 
   Upload, 
   ArrowLeft,
-  Loader2
+  Loader2,
+  Send
 } from "lucide-react"
 
 interface Message {
@@ -543,31 +544,27 @@ export const Interview = function () {
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(track => track.stop())
       }
-      
-      toast.success("Interview completed! Submitting...")
-      
-      // Auto-submit the interview
-      await submitInterview()
-    } else {
     }
+    
+    // Always submit, even without video
+    toast.success("Interview completed! Submitting...")
+    await submitInterview()
   }
 
   // Submit interview
   const submitInterview = async () => {
-    
-    if (!mediaRecorderRef.current || chunksRef.current.length === 0) {
-      toast.error("No recording to submit")
-      return
-    }
-
     const loadingToastId = toast.loading("Submitting interview...", { duration: Infinity })
     
     try {
-      const videoBlob = new Blob(chunksRef.current, { type: "video/webm" })
-      setVideoBlob(videoBlob)
-      
       const formData = new FormData()
-      formData.append("video", videoBlob)
+      
+      // Only add video if recording exists
+      if (mediaRecorderRef.current && chunksRef.current.length > 0) {
+        const videoBlob = new Blob(chunksRef.current, { type: "video/webm" })
+        setVideoBlob(videoBlob)
+        formData.append("video", videoBlob)
+      }
+      
       formData.append("resumeText", resumeText)
       formData.append("messageHistory", JSON.stringify(messages))
       
@@ -748,6 +745,20 @@ export const Interview = function () {
                     >
                       <Upload className="w-5 h-5" />
                       {interviewResult ? 'Interview Completed' : 'Complete Interview'}
+                    </button>
+                    
+                    {/* Manual submit button for text-only submissions */}
+                    <button
+                      onClick={submitInterview}
+                      disabled={!!interviewResult || isLoading}
+                      className={`flex items-center gap-2 px-6 py-3 rounded-lg transition-colors duration-200 ${
+                        interviewResult || isLoading
+                          ? 'bg-gray-400 cursor-not-allowed' 
+                          : 'bg-blue-600 hover:bg-blue-700'
+                      } text-white`}
+                    >
+                      <Send className="w-5 h-5" />
+                      {interviewResult ? 'Interview Completed' : 'Submit Text Only'}
                     </button>
                   </>
                 )}

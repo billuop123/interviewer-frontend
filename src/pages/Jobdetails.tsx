@@ -514,11 +514,15 @@ export const Jobdetails = function () {
                                     Score: {application.relevancescore}/10
                                   </span>
                                 )}
-                                {application.videoLink && (
+                                {application.videoLink ? (
                                   <span className="px-2 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 rounded-full text-xs font-bold">
                                     Video
                                   </span>
-              )}
+                                ) : (
+                                  <span className="px-2 py-1 bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300 rounded-full text-xs font-bold">
+                                    Text Only
+                                  </span>
+                                )}
             </div>
           </div>
 
@@ -558,7 +562,7 @@ export const Jobdetails = function () {
                                 <Mail className="w-3 h-3" />
                                 Contact
                               </button>
-                              {application.videoLink && (
+                              {application.videoLink ? (
                                 <button 
                                   onClick={(e) => {
                                     e.stopPropagation()
@@ -569,6 +573,11 @@ export const Jobdetails = function () {
                                   <Eye className="w-3 h-3" />
                                   View Video
                                 </button>
+                              ) : (
+                                <span className="flex items-center gap-1 px-3 py-1 bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 rounded-md text-sm">
+                                  <FileText className="w-3 h-3" />
+                                  Text Only
+                                </span>
                               )}
                             </div>
                           </div>
