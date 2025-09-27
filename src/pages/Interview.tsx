@@ -567,7 +567,7 @@ export const Interview = function () {
           formData.append("video", videoBlob)
           toast.success(`Video included (${videoSizeMB.toFixed(1)}MB)`)
         } else {
-          toast.warning(`Video too large (${videoSizeMB.toFixed(1)}MB), submitting text only`)
+          toast.error(`Video too large (${videoSizeMB.toFixed(1)}MB), submitting text only`)
         }
       }
       
