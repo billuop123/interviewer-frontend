@@ -1,4 +1,4 @@
-export const BACKEND_URL=`https://biplov.run.place/api/v1`
+export const BACKEND_URL=`https://billu.work.gd/api/v1`
 export function getToken(){
     const token = sessionStorage.getItem("auth_token")
     if (!token) {
