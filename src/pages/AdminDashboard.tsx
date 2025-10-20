@@ -2,8 +2,6 @@ import axios from "axios"
 import { useEffect, useMemo, useState } from "react"
 import { BACKEND_URL, getToken } from "../config"
 import { Link } from "react-router-dom"
-import toast from "react-hot-toast"
-import { ConfirmModal } from "../components/ConfirmModal"
 
 interface Company {
   id: string
@@ -56,7 +54,6 @@ export const AdminDashboard = function () {
   const [jobs, setJobs] = useState<Job[]>([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<TabKey>('overview')
-  const [userSearch, setUserSearch] = useState<string>('')
 
   // pagination for users
   const [usersPage, setUsersPage] = useState<number>(1)
@@ -73,9 +70,6 @@ export const AdminDashboard = function () {
   // create forms state
   const [newJobType, setNewJobType] = useState<{ name: string; description: string }>({ name: '', description: '' })
   const [newCompanyType, setNewCompanyType] = useState<{ name: string; description: string }>({ name: '', description: '' })
-
-  // confirm modal state
-  const [confirmState, setConfirmState] = useState<{ open: boolean, title: string, message: string, onConfirm: () => Promise<void> | void } | null>(null)
 
   useEffect(() => {
     fetchDashboardData()
@@ -119,7 +113,9 @@ export const AdminDashboard = function () {
       const res = await axios.get(`${BACKEND_URL}/users?limit=${usersPageSize}&page=${page}`, {
         headers: { Authorization: getToken() }
       })
+      // backend returns { result }
       setUsers(res.data.result || [])
+      // naive total - if backend doesn't provide count, infer from page fill
       setUsersTotal(page * usersPageSize + (res.data.result?.length || 0))
     } catch (e) {
       console.error('Error fetching users:', e)
@@ -155,12 +151,10 @@ export const AdminDashboard = function () {
 
   const updateUserRole = async (userId: string, roleId: string) => {
     try {
-      await axios.put(`${BACKEND_URL}/users/${userId}`, { roleId }, { headers: { Authorization: getToken() } })
+      await axios.put(`${BACKEND_URL}/user/${userId}`, { roleId }, { headers: { Authorization: getToken() } })
       await fetchUsers(usersPage)
-      toast.success('Role updated')
-    } catch (e: any) {
+    } catch (e) {
       console.error('Error updating user role:', e)
-      toast.error(e?.response?.data?.message || 'Failed to update role')
     }
   }
 
@@ -170,31 +164,19 @@ export const AdminDashboard = function () {
       await axios.post(`${BACKEND_URL}/jobtype`, newJobType, { headers: { Authorization: getToken() } })
       setNewJobType({ name: '', description: '' })
       fetchJobTypes()
-      toast.success('Job type created')
-    } catch (e: any) {
+    } catch (e) {
       console.error('Error creating job type:', e)
-      toast.error(e?.response?.data?.message || 'Failed to create job type')
     }
   }
 
   const deleteJobType = async (jobtypeid: string) => {
-    setConfirmState({
-      open: true,
-      title: 'Delete Job Type',
-      message: 'Are you sure you want to delete this job type?',
-      onConfirm: async () => {
-        try {
-          await axios.delete(`${BACKEND_URL}/jobtype/${jobtypeid}`, { headers: { Authorization: getToken() } })
-          toast.success('Job type deleted successfully')
-          await fetchJobTypes()
-        } catch (e: any) {
-          console.error('Error deleting job type:', e)
-          toast.error(e?.response?.data?.message || 'Failed to delete job type')
-        } finally {
-          setConfirmState(null)
-        }
-      }
-    })
+    if (!confirm('Delete this job type?')) return
+    try {
+      await axios.delete(`${BACKEND_URL}/jobstype/${jobtypeid}`, { headers: { Authorization: getToken() } })
+      fetchJobTypes()
+    } catch (e) {
+      console.error('Error deleting job type:', e)
+    }
   }
 
   const createCompanyType = async () => {
@@ -203,105 +185,62 @@ export const AdminDashboard = function () {
       await axios.post(`${BACKEND_URL}/companytype`, newCompanyType, { headers: { Authorization: getToken() } })
       setNewCompanyType({ name: '', description: '' })
       fetchCompanyTypes()
-      toast.success('Company type created')
-    } catch (e: any) {
+    } catch (e) {
       console.error('Error creating company type:', e)
-      toast.error(e?.response?.data?.message || 'Failed to create company type')
     }
   }
 
   const deleteCompanyType = async (companyTypeId: string) => {
-    setConfirmState({
-      open: true,
-      title: 'Delete Company Type',
-      message: 'Are you sure you want to delete this company type?',
-      onConfirm: async () => {
-        try {
-          await axios.delete(`${BACKEND_URL}/companytype/${companyTypeId}`, { headers: { Authorization: getToken() } })
-          toast.success('Company type deleted successfully')
-          await fetchCompanyTypes()
-        } catch (e: any) {
-          console.error('Error deleting company type:', e)
-          toast.error(e?.response?.data?.message || 'Failed to delete company type')
-        } finally {
-          setConfirmState(null)
-        }
-      }
-    })
+    if (!confirm('Delete this company type?')) return
+    try {
+      await axios.delete(`${BACKEND_URL}/companytype/${companyTypeId}`, { headers: { Authorization: getToken() } })
+      fetchCompanyTypes()
+    } catch (e) {
+      console.error('Error deleting company type:', e)
+    }
   }
 
   const handleBlacklistCompany = async (companyId: string, blacklist: boolean) => {
     try {
       await axios.put(`${BACKEND_URL}/company/${companyId}`, { blacklisted: blacklist }, { headers: { Authorization: getToken() } })
       fetchDashboardData()
-      toast.success(blacklist ? 'Company blacklisted' : 'Company unblacklisted')
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error updating company:", error)
-      toast.error(error?.response?.data?.message || 'Failed to update company')
     }
   }
 
   const handleDeleteCompany = async (companyId: string) => {
-    setConfirmState({
-      open: true,
-      title: 'Delete Company',
-      message: 'Are you sure you want to delete this company? This action cannot be undone.',
-      onConfirm: async () => {
-        try {
-          await axios.delete(`${BACKEND_URL}/company/${companyId}`, { headers: { Authorization: getToken() } })
-          toast.success('Company deleted successfully')
-          await fetchDashboardData()
-        } catch (error: any) {
-          console.error('Error deleting company:', error)
-          toast.error(error?.response?.data?.message || 'Failed to delete company')
-        } finally {
-          setConfirmState(null)
-        }
+    if (window.confirm("Are you sure you want to delete this company?")) {
+      try {
+        await axios.delete(`${BACKEND_URL}/company/${companyId}`, { headers: { Authorization: getToken() } })
+        fetchDashboardData()
+      } catch (error) {
+        console.error("Error deleting company:", error)
       }
-    })
+    }
   }
 
   const handleDeleteUser = async (userId: string) => {
-    setConfirmState({
-      open: true,
-      title: 'Delete User',
-      message: 'Are you sure you want to delete this user?',
-      onConfirm: async () => {
-        try {
-          await axios.delete(`${BACKEND_URL}/users/${userId}`, { headers: { Authorization: getToken() } })
-          toast.success('User deleted successfully')
-          await fetchUsers(usersPage)
-        } catch (error: any) {
-          console.error('Error deleting user:', error)
-          toast.error(error?.response?.data?.message || 'Failed to delete user')
-        } finally {
-          setConfirmState(null)
-        }
+    if (window.confirm("Are you sure you want to delete this user?")) {
+      try {
+        await axios.delete(`${BACKEND_URL}/user/${userId}`, { headers: { Authorization: getToken() } })
+        fetchUsers(usersPage)
+      } catch (error) {
+        console.error("Error deleting user:", error)
       }
-    })
+    }
   }
 
   const handleDeleteJob = async (jobId: string) => {
-    setConfirmState({
-      open: true,
-      title: 'Delete Job',
-      message: 'Are you sure you want to delete this job?',
-      onConfirm: async () => {
-        try {
-          await axios.delete(`${BACKEND_URL}/job/${jobId}`, { headers: { Authorization: getToken() } })
-          toast.success('Job deleted successfully')
-          await fetchDashboardData()
-        } catch (error: any) {
-          console.error('Error deleting job:', error)
-          toast.error(error?.response?.data?.message || 'Failed to delete job')
-        } finally {
-          setConfirmState(null)
-        }
+    if (window.confirm("Are you sure you want to delete this job?")) {
+      try {
+        await axios.delete(`${BACKEND_URL}/job/${jobId}`, { headers: { Authorization: getToken() } })
+        fetchDashboardData()
+      } catch (error) {
+        console.error("Error deleting job:", error)
       }
-    })
+    }
   }
-
-  const onCloseConfirm = () => setConfirmState(null)
 
   if (loading) {
     return (
@@ -317,20 +256,10 @@ export const AdminDashboard = function () {
   return (
     <div className="fixed inset-0 w-full h-full bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-black dark:to-gray-800 overflow-auto">
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <ConfirmModal
-          open={!!confirmState?.open}
-          title={confirmState?.title || ''}
-          message={confirmState?.message || ''}
-          confirmText="Confirm"
-          confirmVariant="danger"
-          onConfirm={() => confirmState?.onConfirm?.()}
-          onCancel={onCloseConfirm}
-        />
-
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">Admin Dashboard</h1>
 
         {/* Tabs */}
-        <div className="flex flex-wrap gap-2 border-b border-gray-200 dark:border-gray-800 mb-6" role="tablist">
+        <div className="flex flex-wrap gap-2 border-b border-gray-200 dark:border-gray-800 mb-6">
         {[
           { key: 'overview', label: 'Overview' },
           { key: 'companies', label: 'Companies' },
@@ -343,11 +272,9 @@ export const AdminDashboard = function () {
           <button
             key={tab.key}
               onClick={() => setActiveTab(tab.key as TabKey)}
-              role="tab"
-              aria-selected={activeTab === tab.key}
-              className={`px-4 py-2 rounded-t-md font-medium transition-colors outline outline-1 ${activeTab === tab.key ? 'bg-gray-900 text-white outline-gray-300 dark:outline-gray-700' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 outline-transparent'}`}
-            >
-              <span className="whitespace-nowrap">{tab.label}</span>
+              className={`px-4 py-2 rounded-t-md font-medium transition-colors ${activeTab === tab.key ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'}`}
+          >
+            {tab.label}
           </button>
         ))}
       </div>
@@ -363,7 +290,7 @@ export const AdminDashboard = function () {
               <div className="bg-green-600 text-white rounded-xl p-6 shadow">
                 <h3 className="text-sm opacity-90">Total Users</h3>
                 <p className="text-3xl font-bold">{users.length}</p>
-            </div>
+              </div>
               <div className="bg-cyan-600 text-white rounded-xl p-6 shadow">
                 <h3 className="text-sm opacity-90">Total Jobs</h3>
                 <p className="text-3xl font-bold">{jobs.length}</p>
@@ -373,6 +300,7 @@ export const AdminDashboard = function () {
                 <p className="text-3xl font-bold">{jobs.filter(j => j.isactive).length}</p>
             </div>
             </div>
+            
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div className="bg-white/90 dark:bg-gray-900/90 border border-gray-200/60 dark:border-gray-800/60 rounded-xl p-6">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Recent Companies</h3>
@@ -381,10 +309,10 @@ export const AdminDashboard = function () {
                     <div key={c.id} className="py-3 flex items-center justify-between">
                       <span className="font-medium text-gray-900 dark:text-white">{c.name}</span>
                       <span className="text-xs text-gray-500 dark:text-gray-400">{new Date(c.created).toLocaleDateString()}</span>
-          </div>
+            </div>
                   ))}
                 </div>
-            </div>
+              </div>
               <div className="bg-white/90 dark:bg-gray-900/90 border border-gray-200/60 dark:border-gray-800/60 rounded-xl p-6">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Recent Jobs</h3>
                 <div className="divide-y divide-gray-200 dark:divide-gray-800">
@@ -395,7 +323,7 @@ export const AdminDashboard = function () {
                 </div>
               ))}
                 </div>
-            </div>
+              </div>
           </div>
         </div>
       )}
@@ -462,12 +390,6 @@ export const AdminDashboard = function () {
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Users Management</h2>
               <div className="flex items-center gap-2">
-                <input
-                  value={userSearch}
-                  onChange={(e) => setUserSearch(e.target.value)}
-                  placeholder="Search by name or email"
-                  className="px-3 py-2 rounded-md bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-white"
-                />
                 <button disabled={usersPage === 1} onClick={() => setUsersPage(p => Math.max(1, p - 1))} className="px-3 py-1 rounded-md bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-gray-200 disabled:opacity-50">Prev</button>
                 <span className="text-gray-700 dark:text-gray-300">Page {usersPage}</span>
                 <button onClick={() => setUsersPage(p => p + 1)} className="px-3 py-1 rounded-md bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-gray-200">Next</button>
@@ -487,16 +409,7 @@ export const AdminDashboard = function () {
                 </tr>
               </thead>
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                  {users
-                    .filter(u => {
-                      const q = userSearch.trim().toLowerCase()
-                      if (!q) return true
-                      return (
-                        (u.name || '').toLowerCase().includes(q) ||
-                        (u.email || '').toLowerCase().includes(q)
-                      )
-                    })
-                    .map(user => (
+                {users.map(user => (
                     <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/40">
                       <td className="px-4 py-3 text-gray-900 dark:text-white">{user.name}</td>
                       <td className="px-4 py-3 text-gray-700 dark:text-gray-300">{user.email}</td>
@@ -517,7 +430,7 @@ export const AdminDashboard = function () {
                     </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
-                          <button onClick={() => updateUserRole(user.id, (pendingUserRoles[user.id] ?? user.roleId) || '')} className="inline-block px-3 py-1 rounded-md text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white whitespace-nowrap border border-blue-700">Save</button>
+                          <button onClick={() => updateUserRole(user.id, (pendingUserRoles[user.id] ?? user.roleId) || '')} className="px-3 py-1 rounded-md text-sm font-medium bg-gray-900 dark:bg-white text-white dark:text-gray-900">Save</button>
                           <button onClick={() => handleDeleteUser(user.id)} className="px-3 py-1 rounded-md text-sm font-medium bg-red-600 hover:bg-red-700 text-white">Delete</button>
                         </div>
                     </td>

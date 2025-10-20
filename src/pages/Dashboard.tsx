@@ -4,6 +4,7 @@ import { useUser } from "../contexts/userContext"
 import toast from "react-hot-toast"
 import { useEffect, useMemo, useState } from "react"
 import { BACKEND_URL, getToken } from "../config"
+import { GlobalLoader } from "../components/GlobalLoader"
 
 interface UserApplication {
   id: string
@@ -22,9 +23,21 @@ interface JobSummary {
 }
 
 export const Dashboard = function () {
-  const { user, logout } = useUser()
+  const { user, logout, loading } = useUser()
   const navigate = useNavigate()
-  const roleCode = user?.role || ""
+
+  // Fallback: get role from token if context not initialized yet
+  const token = typeof window !== 'undefined' ? sessionStorage.getItem('auth_token') : null
+  let tokenRole = ''
+  try {
+    if (token) {
+      const parts = token.split('.')
+      const payload = JSON.parse(atob(parts[1] || ''))
+      tokenRole = payload?.role || ''
+    }
+  } catch {}
+
+  const roleCode = (user?.role || tokenRole || "").toUpperCase()
   const isRecruiter = roleCode === "RECRUITER" || roleCode === "ADMIN"
 
   const [userApps, setUserApps] = useState<UserApplication[]>([])
@@ -55,13 +68,17 @@ export const Dashboard = function () {
         // ignore
       }
     }
-    load()
-  }, [isRecruiter, user.userId])
+    if (!loading && user.userId) load()
+  }, [loading, isRecruiter, user.userId])
 
   const handleLogout = () => {
     logout()
     toast.success("Logged out successfully")
     navigate("/signin")
+  }
+
+  if (loading) {
+    return <GlobalLoader />
   }
 
   // USER STATS

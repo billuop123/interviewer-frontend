@@ -9,14 +9,29 @@ interface RoleGuardProps {
 }
 
 export const RoleGuard = ({ children, allowedRoles }: RoleGuardProps) => {
-  const { user } = useUser()
-  const roleCode = user?.role || ''
+  const { user, loading } = useUser()
 
-  if (!allowedRoles.includes(roleCode)) {
+  if (loading) return null
+
+  // Fallback role from token on first paint
+  const token = typeof window !== 'undefined' ? sessionStorage.getItem('auth_token') : null
+  let tokenRole = ''
+  try {
+    if (token) {
+      const parts = token.split('.')
+      const payload = JSON.parse(atob(parts[1] || ''))
+      tokenRole = (payload?.role || '').toUpperCase()
+    }
+  } catch {}
+
+  const roleCode = (user?.role || tokenRole || '').toUpperCase()
+
+  if (!allowedRoles.map(r => r.toUpperCase()).includes(roleCode)) {
     toast.error('You do not have permission to access this page')
     return <Navigate to="/dashboard" replace />
   }
 
   return <>{children}</>
 }
+
 

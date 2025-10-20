@@ -27,12 +27,11 @@ function UserProvider({ children }: UserProviderProps) {
     name: "",
     email: "",
     role: "",
-    userId: ""
+    userId: "",
   });
   
   const [loading, setLoading] = useState<boolean>(true);
 
-  // Logout function
   const logout = () => {
     sessionStorage.removeItem("auth_token");
     setUser({ name: "", email: "", role: "", userId: "" });
@@ -71,11 +70,9 @@ function UserProvider({ children }: UserProviderProps) {
           });
         }
       } catch (error: any) {
-        // Only clear token if it's actually invalid (401/403), not network errors
         if (error.response?.status === 401 || error.response?.status === 403) {
           logout();
         } else {
-          // Keep the token but set user as empty (will retry on next page load)
           setUser({ name: "", email: "", role: "", userId: "" });
         }
       } finally {
