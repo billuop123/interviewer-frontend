@@ -6,6 +6,7 @@ import { Suspense, lazy } from 'react'
 import { UserProvider, useUser } from './contexts/userContext'
 import { AuthGuard } from './components/AuthGuard'
 import { GlobalLoader } from './components/GlobalLoader'
+import { RoleGuard } from './components/RoleGuard'
 
 // Lazy load all page components
 const Home = lazy(() => import('./pages/Home').then(module => ({ default: module.Home })))
@@ -24,11 +25,11 @@ const PostJob = lazy(() => import('./pages/PostJob').then(module => ({ default: 
 const ApplicationDetails = lazy(() => import('./pages/ApplicationDetails').then(module => ({ default: module.ApplicationDetails })))
 const EditCompany = lazy(() => import('./pages/EditCompany').then(module => ({ default: module.EditCompany })))
 const ViewJobs = lazy(() => import('./pages/ViewJobs').then(module => ({ default: module.ViewJobs })))
+const Applications = lazy(() => import('./pages/Applications').then(module => ({ default: module.Applications })))
 const NotFound = lazy(() => import('./pages/NotFound').then(module => ({ default: module.NotFound })))
 
 function AppContent() {
   const { user } = useUser()
-
 
   return (
     <>
@@ -62,12 +63,21 @@ function AppContent() {
           } />
           <Route path="/create-company" element={
             <AuthGuard>
-              <CreateCompany/>
+              <RoleGuard allowedRoles={["RECRUITER", "ADMIN"]}>
+                <CreateCompany/>
+              </RoleGuard>
             </AuthGuard>
           } />
           <Route path="/my-companies" element={
             <AuthGuard>
-              <MyCompanies/>
+              <RoleGuard allowedRoles={["RECRUITER", "ADMIN"]}>
+                <MyCompanies/>
+              </RoleGuard>
+            </AuthGuard>
+          } />
+          <Route path="/applications" element={
+            <AuthGuard>
+              <Applications/>
             </AuthGuard>
           } />
           <Route path="/user-details" element={

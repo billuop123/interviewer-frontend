@@ -110,6 +110,27 @@ export const Jobdetails = function () {
     fetchJobDetails()
   }, [jobId])
 
+  useEffect(() => {
+    if (!jobId) return
+    const bumpViews = async () => {
+      try {
+        // Fetch current job to get the latest viewscount
+        const res = await axios.get(`${BACKEND_URL}/job/${jobId}`, {
+          headers: { Authorization: getToken() }
+        })
+        const current = res.data?.viewscount || 0
+        await axios.put(`${BACKEND_URL}/job/${jobId}`, {
+          viewscount: (current || 0) + 1
+        }, {
+          headers: { Authorization: getToken() }
+        })
+      } catch (e) {
+        // ignore view bump errors
+      }
+    }
+    bumpViews()
+  }, [jobId])
+
   // Fetch user details for non-job owners
   useEffect(() => {
     async function fetchUserDetails() {
@@ -130,11 +151,10 @@ export const Jobdetails = function () {
       } finally {
         setUserDetailsLoading(false)
       }
-    }
+    }   
     fetchUserDetails()
   }, [isJobOwner, userId])
 
-  // Fetch applications when user is job owner
   useEffect(() => {
     async function fetchApplications() {
       if (!isJobOwner || !jobId) return
@@ -146,6 +166,7 @@ export const Jobdetails = function () {
             Authorization: getToken(),
           },
         })
+        console.log(response.data)
         setApplications(response.data)
       } catch (err) {
         console.error("Error fetching applications:", err)
@@ -483,105 +504,43 @@ export const Jobdetails = function () {
                         </p>
                       </div>
                     ) : (
-                      <div className="space-y-4 max-h-96 overflow-y-auto">
-                        {(applications || []).map((application) => (
-                          <div 
-                            key={application.id} 
-                            onClick={() => navigate(`/application/${application.id}`)}
-                            className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer hover:shadow-md"
-                          >
-                            <div className="flex items-start justify-between mb-3">
-                              <div>
-                                <h4 className="font-semibold text-gray-900 dark:text-white">
-                                  {application.user.name || application.user.email}
-                                </h4>
-                                <p className="text-sm text-gray-500 dark:text-gray-400">
-                                  {application.user.email}
-                                </p>
-                                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                                  Applied: {new Date(application.created).toLocaleDateString()}
-                                </p>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                {application.relevancescore && (
-                                  <span className={`px-2 py-1 rounded-full text-xs font-bold ${
-                                    application.relevancescore >= 8 
-                                      ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
-                                      : application.relevancescore >= 6
-                                      ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300'
-                                      : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
-                                  }`}>
-                                    Score: {application.relevancescore}/10
-                                  </span>
-                                )}
-                                {application.videolink ? (
-                                  <span className="px-2 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 rounded-full text-xs font-bold">
-                                    Video
-                                  </span>
-                                ) : (
-                                  <span className="px-2 py-1 bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300 rounded-full text-xs font-bold">
-                                    Text Only
-                                  </span>
-                                )}
-            </div>
-          </div>
-
-                            <div className="mb-3">
-                              <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Cover Letter:</h5>
-                              <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-3">
-                                {application.coverletter}
-                              </p>
-                            </div>
-                            
-                            {application.notes && (
-                              <div className="mb-3">
-                                <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Notes:</h5>
-                                <p className="text-sm text-gray-600 dark:text-gray-400">
-                                  {application.notes}
-                                </p>
-                              </div>
-                            )}
-                            
-                            {application.relevancecomment && (
-                              <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 mt-3">
-                                <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">AI Evaluation:</h5>
-                                <p className="text-sm text-gray-600 dark:text-gray-400">
-                                  {application.relevancecomment}
-                                </p>
-                              </div>
-                            )}
-                            
-                            <div className="flex gap-2 mt-4">
-                              <button 
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  window.open(`mailto:${application.user.email}`, '_blank')
-                                }}
-                                className="flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 rounded-md text-sm hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
-                              >
-                                <Mail className="w-3 h-3" />
-                                Contact
-                              </button>
-                              {application.videolink ? (
-                                <button 
-                                  onClick={(e) => {
-                                    e.stopPropagation()
-                                    window.open(application.videolink, '_blank')
-                                  }}
-                                  className="flex items-center gap-1 px-3 py-1 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 rounded-md text-sm hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors"
-                                >
-                                  <Eye className="w-3 h-3" />
-                                  View Video
-                                </button>
-                              ) : (
-                                <span className="flex items-center gap-1 px-3 py-1 bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 rounded-md text-sm">
-                                  <FileText className="w-3 h-3" />
-                                  Text Only
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        ))}
+                      <div className="max-h-96 overflow-y-auto">
+                        <table className="w-full">
+                          <thead className="bg-gray-50 dark:bg-gray-800/50 sticky top-0 z-10">
+                            <tr>
+                              <th className="px-3 py-2 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Candidate</th>
+                              <th className="px-3 py-2 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Score</th>
+                              <th className="px-3 py-2 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Applied</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                            {(applications || []).map((application) => (
+                              <tr key={application.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer" onClick={() => navigate(`/application/${application.id}`)}>
+                                <td className="px-3 py-2 text-gray-900 dark:text-white">{application.user.name || application.user.email}</td>
+                                <td className="px-3 py-2">
+                                  {(() => {
+                                    const s = application.relevancescore as unknown as string | number | null | undefined
+                                    const scoreNum = s === null || s === undefined || s === '' ? NaN : Number(s)
+                                    return isNaN(scoreNum) ? (
+                                      <span className="text-gray-500 dark:text-gray-400 text-sm">—</span>
+                                    ) : (
+                                      <span className={`px-2 py-1 rounded-full text-xs font-bold ${
+                                        scoreNum >= 8
+                                          ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
+                                          : scoreNum >= 6
+                                          ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300'
+                                          : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
+                                      }`}>
+                                        {scoreNum}/10
+                                      </span>
+                                    )
+                                  })()}
+                                </td>
+                                <td className="px-3 py-2 text-sm text-gray-600 dark:text-gray-400">{new Date(application.created).toLocaleDateString()}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
                       </div>
                     )}
                   </>

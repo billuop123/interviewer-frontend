@@ -32,12 +32,10 @@ export const Signin = function() {
             
             sessionStorage.setItem("auth_token", response.data.token)
             const { name: contextName, email: contextEmail, role: { code: contextRole }, id } = response.data.result
-            
+            console.log(contextRole)
             setUser({ name: contextName, email: contextEmail, role: contextRole, userId: id })
             
             toast.success(`Welcome back, ${contextName}! 🎉`)
-            
-            // Route based on user role
             if (contextRole === "ADMIN") {
                 navigate("/admindashboard")
             } else {

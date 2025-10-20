@@ -53,13 +53,6 @@ export const Home = function() {
                     <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform duration-200" />
                   </Link>
                   <Link
-                    to="/company-jobs"
-                    className="group relative inline-flex items-center gap-3 px-8 py-4 border-2 border-black dark:border-white text-black dark:text-white rounded-full font-bold text-lg hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-                  >
-                    <Building2 size={20} />
-                    Company Jobs
-                  </Link>
-                  <Link
                     to="/dashboard"
                     className="group relative inline-flex items-center gap-3 px-8 py-4 border-2 border-black dark:border-white text-black dark:text-white rounded-full font-bold text-lg hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
                   >

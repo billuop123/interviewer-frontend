@@ -253,7 +253,7 @@ export const Jobs = function () {
                 >
                   <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-xl border border-gray-200/60 dark:border-gray-800/60 shadow-lg hover:shadow-xl transition-all duration-300 p-6 group-hover:-translate-y-1 relative">
                     {job.isfeatured && (
-                      <div className="absolute top-4 right-4 bg-yellow-500 text-black px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+                      <div className="absolute left-1/2 -translate-x-1/2 top-4 bg-yellow-500 text-black px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow z-10">
                         <Star className="w-3 h-3" />
                         FEATURED
                       </div>

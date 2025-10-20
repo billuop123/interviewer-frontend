@@ -1,7 +1,9 @@
 import axios from "axios"
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { BACKEND_URL, getToken } from "../config"
 import { Link } from "react-router-dom"
+import toast from "react-hot-toast"
+import { ConfirmModal } from "../components/ConfirmModal"
 
 interface Company {
   id: string
@@ -42,34 +44,68 @@ interface Job {
   }
 }
 
+interface Role { id: string; name: string; code: string }
+interface JobType { id: string; name: string; description?: string }
+interface CompanyType { id: string; name: string; description?: string }
+
+type TabKey = 'overview' | 'companies' | 'users' | 'jobs' | 'roles' | 'jobtypes' | 'companytypes'
+
 export const AdminDashboard = function () {
   const [companies, setCompanies] = useState<Company[]>([])
   const [users, setUsers] = useState<User[]>([])
   const [jobs, setJobs] = useState<Job[]>([])
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState<'overview' | 'companies' | 'users' | 'jobs'>('overview')
+  const [activeTab, setActiveTab] = useState<TabKey>('overview')
+  const [userSearch, setUserSearch] = useState<string>('')
+
+  // pagination for users
+  const [usersPage, setUsersPage] = useState<number>(1)
+  const usersPageSize = 20
+  const [usersTotal, setUsersTotal] = useState<number>(0)
+
+  // admin resources
+  const [roles, setRoles] = useState<Role[]>([])
+  const [jobTypes, setJobTypes] = useState<JobType[]>([])
+  const [companyTypes, setCompanyTypes] = useState<CompanyType[]>([])
+  // role editing local state
+  const [pendingUserRoles, setPendingUserRoles] = useState<Record<string, string>>({})
+
+  // create forms state
+  const [newJobType, setNewJobType] = useState<{ name: string; description: string }>({ name: '', description: '' })
+  const [newCompanyType, setNewCompanyType] = useState<{ name: string; description: string }>({ name: '', description: '' })
+
+  // confirm modal state
+  const [confirmState, setConfirmState] = useState<{ open: boolean, title: string, message: string, onConfirm: () => Promise<void> | void } | null>(null)
 
   useEffect(() => {
     fetchDashboardData()
   }, [])
 
+  useEffect(() => {
+    if (activeTab === 'users') {
+      fetchUsers(usersPage)
+      fetchRoles()
+    }
+  }, [activeTab, usersPage])
+
+  useEffect(() => {
+    if (activeTab === 'roles') {
+      fetchRoles()
+    } else if (activeTab === 'jobtypes') {
+      fetchJobTypes()
+    } else if (activeTab === 'companytypes') {
+      fetchCompanyTypes()
+    }
+  }, [activeTab])
+
   const fetchDashboardData = async () => {
     try {
       setLoading(true)
-      const [companiesRes, usersRes, jobsRes] = await Promise.all([
-        axios.get(`${BACKEND_URL}/company`, {
-          headers: { Authorization: getToken() }
-        }),
-        axios.get(`${BACKEND_URL}/user`, {
-          headers: { Authorization: getToken() }
-        }),
-        axios.get(`${BACKEND_URL}/job`, {
-          headers: { Authorization: getToken() }
-        })
+      const [companiesRes, jobsRes] = await Promise.all([
+        axios.get(`${BACKEND_URL}/company`, { headers: { Authorization: getToken() } }),
+        axios.get(`${BACKEND_URL}/job`, { headers: { Authorization: getToken() } })
       ])
-      
       setCompanies(companiesRes.data)
-      setUsers(usersRes.data.result)
       setJobs(jobsRes.data)
     } catch (error) {
       console.error("Error fetching dashboard data:", error)
@@ -78,336 +114,338 @@ export const AdminDashboard = function () {
     }
   }
 
-  const handleBlacklistCompany = async (companyId: string, blacklist: boolean) => {
+  const fetchUsers = async (page: number) => {
     try {
-      await axios.put(`${BACKEND_URL}/company/${companyId}`, {
-        blacklisted: blacklist
-      }, {
+      const res = await axios.get(`${BACKEND_URL}/users?limit=${usersPageSize}&page=${page}`, {
         headers: { Authorization: getToken() }
       })
+      setUsers(res.data.result || [])
+      setUsersTotal(page * usersPageSize + (res.data.result?.length || 0))
+    } catch (e) {
+      console.error('Error fetching users:', e)
+    }
+  }
+
+  const fetchRoles = async () => {
+    try {
+      const res = await axios.get(`${BACKEND_URL}/roles/getallroles`, { headers: { Authorization: getToken() } })
+      setRoles(res.data.roles || [])
+    } catch (e) {
+      console.error('Error fetching roles:', e)
+    }
+  }
+
+  const fetchJobTypes = async () => {
+    try {
+      const res = await axios.get(`${BACKEND_URL}/jobtype/getAllJobs`, { headers: { Authorization: getToken() } })
+      setJobTypes(res.data.allJobs || [])
+    } catch (e) {
+      console.error('Error fetching job types:', e)
+    }
+  }
+
+  const fetchCompanyTypes = async () => {
+    try {
+      const res = await axios.get(`${BACKEND_URL}/companytype/getAllcompanytype`, { headers: { Authorization: getToken() } })
+      setCompanyTypes(res.data || [])
+    } catch (e) {
+      console.error('Error fetching company types:', e)
+    }
+  }
+
+  const updateUserRole = async (userId: string, roleId: string) => {
+    try {
+      await axios.put(`${BACKEND_URL}/users/${userId}`, { roleId }, { headers: { Authorization: getToken() } })
+      await fetchUsers(usersPage)
+      toast.success('Role updated')
+    } catch (e: any) {
+      console.error('Error updating user role:', e)
+      toast.error(e?.response?.data?.message || 'Failed to update role')
+    }
+  }
+
+  const createJobType = async () => {
+    if (!newJobType.name.trim() || !newJobType.description.trim()) return
+    try {
+      await axios.post(`${BACKEND_URL}/jobtype`, newJobType, { headers: { Authorization: getToken() } })
+      setNewJobType({ name: '', description: '' })
+      fetchJobTypes()
+      toast.success('Job type created')
+    } catch (e: any) {
+      console.error('Error creating job type:', e)
+      toast.error(e?.response?.data?.message || 'Failed to create job type')
+    }
+  }
+
+  const deleteJobType = async (jobtypeid: string) => {
+    setConfirmState({
+      open: true,
+      title: 'Delete Job Type',
+      message: 'Are you sure you want to delete this job type?',
+      onConfirm: async () => {
+        try {
+          await axios.delete(`${BACKEND_URL}/jobtype/${jobtypeid}`, { headers: { Authorization: getToken() } })
+          toast.success('Job type deleted successfully')
+          await fetchJobTypes()
+        } catch (e: any) {
+          console.error('Error deleting job type:', e)
+          toast.error(e?.response?.data?.message || 'Failed to delete job type')
+        } finally {
+          setConfirmState(null)
+        }
+      }
+    })
+  }
+
+  const createCompanyType = async () => {
+    if (!newCompanyType.name.trim() || !newCompanyType.description.trim()) return
+    try {
+      await axios.post(`${BACKEND_URL}/companytype`, newCompanyType, { headers: { Authorization: getToken() } })
+      setNewCompanyType({ name: '', description: '' })
+      fetchCompanyTypes()
+      toast.success('Company type created')
+    } catch (e: any) {
+      console.error('Error creating company type:', e)
+      toast.error(e?.response?.data?.message || 'Failed to create company type')
+    }
+  }
+
+  const deleteCompanyType = async (companyTypeId: string) => {
+    setConfirmState({
+      open: true,
+      title: 'Delete Company Type',
+      message: 'Are you sure you want to delete this company type?',
+      onConfirm: async () => {
+        try {
+          await axios.delete(`${BACKEND_URL}/companytype/${companyTypeId}`, { headers: { Authorization: getToken() } })
+          toast.success('Company type deleted successfully')
+          await fetchCompanyTypes()
+        } catch (e: any) {
+          console.error('Error deleting company type:', e)
+          toast.error(e?.response?.data?.message || 'Failed to delete company type')
+        } finally {
+          setConfirmState(null)
+        }
+      }
+    })
+  }
+
+  const handleBlacklistCompany = async (companyId: string, blacklist: boolean) => {
+    try {
+      await axios.put(`${BACKEND_URL}/company/${companyId}`, { blacklisted: blacklist }, { headers: { Authorization: getToken() } })
       fetchDashboardData()
-    } catch (error) {
+      toast.success(blacklist ? 'Company blacklisted' : 'Company unblacklisted')
+    } catch (error: any) {
       console.error("Error updating company:", error)
+      toast.error(error?.response?.data?.message || 'Failed to update company')
     }
   }
 
   const handleDeleteCompany = async (companyId: string) => {
-    if (window.confirm("Are you sure you want to delete this company?")) {
-      try {
-        await axios.delete(`${BACKEND_URL}/company/${companyId}`, {
-          headers: { Authorization: getToken() }
-        })
-        fetchDashboardData()
-      } catch (error) {
-        console.error("Error deleting company:", error)
+    setConfirmState({
+      open: true,
+      title: 'Delete Company',
+      message: 'Are you sure you want to delete this company? This action cannot be undone.',
+      onConfirm: async () => {
+        try {
+          await axios.delete(`${BACKEND_URL}/company/${companyId}`, { headers: { Authorization: getToken() } })
+          toast.success('Company deleted successfully')
+          await fetchDashboardData()
+        } catch (error: any) {
+          console.error('Error deleting company:', error)
+          toast.error(error?.response?.data?.message || 'Failed to delete company')
+        } finally {
+          setConfirmState(null)
+        }
       }
-    }
+    })
   }
 
   const handleDeleteUser = async (userId: string) => {
-    if (window.confirm("Are you sure you want to delete this user?")) {
-      try {
-        await axios.delete(`${BACKEND_URL}/user/${userId}`, {
-          headers: { Authorization: getToken() }
-        })
-        fetchDashboardData()
-      } catch (error) {
-        console.error("Error deleting user:", error)
+    setConfirmState({
+      open: true,
+      title: 'Delete User',
+      message: 'Are you sure you want to delete this user?',
+      onConfirm: async () => {
+        try {
+          await axios.delete(`${BACKEND_URL}/users/${userId}`, { headers: { Authorization: getToken() } })
+          toast.success('User deleted successfully')
+          await fetchUsers(usersPage)
+        } catch (error: any) {
+          console.error('Error deleting user:', error)
+          toast.error(error?.response?.data?.message || 'Failed to delete user')
+        } finally {
+          setConfirmState(null)
+        }
       }
-    }
+    })
   }
 
   const handleDeleteJob = async (jobId: string) => {
-    if (window.confirm("Are you sure you want to delete this job?")) {
-      try {
-        await axios.delete(`${BACKEND_URL}/job/${jobId}`, {
-          headers: { Authorization: getToken() }
-        })
-        fetchDashboardData()
-      } catch (error) {
-        console.error("Error deleting job:", error)
+    setConfirmState({
+      open: true,
+      title: 'Delete Job',
+      message: 'Are you sure you want to delete this job?',
+      onConfirm: async () => {
+        try {
+          await axios.delete(`${BACKEND_URL}/job/${jobId}`, { headers: { Authorization: getToken() } })
+          toast.success('Job deleted successfully')
+          await fetchDashboardData()
+        } catch (error: any) {
+          console.error('Error deleting job:', error)
+          toast.error(error?.response?.data?.message || 'Failed to delete job')
+        } finally {
+          setConfirmState(null)
+        }
       }
-    }
+    })
   }
+
+  const onCloseConfirm = () => setConfirmState(null)
 
   if (loading) {
     return (
-      <div style={{ padding: "20px", textAlign: "center" }}>
-        <p>Loading admin dashboard...</p>
+      <div className="fixed inset-0 w-full h-full bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-black dark:to-gray-800 flex items-center justify-center">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="w-12 h-12 border-4 border-gray-300 dark:border-gray-600 border-t-gray-600 dark:border-t-gray-300 rounded-full animate-spin"></div>
+          <p className="text-gray-600 dark:text-gray-400 text-lg">Loading admin dashboard...</p>
+        </div>
       </div>
     )
   }
 
   return (
-    <div style={{ padding: "20px", maxWidth: "1400px", margin: "0 auto" }}>
-      <h1 style={{ textAlign: "center", marginBottom: "30px", color: "#333" }}>
-        Admin Dashboard
-      </h1>
+    <div className="fixed inset-0 w-full h-full bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-black dark:to-gray-800 overflow-auto">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <ConfirmModal
+          open={!!confirmState?.open}
+          title={confirmState?.title || ''}
+          message={confirmState?.message || ''}
+          confirmText="Confirm"
+          confirmVariant="danger"
+          onConfirm={() => confirmState?.onConfirm?.()}
+          onCancel={onCloseConfirm}
+        />
 
-      {/* Tab Navigation */}
-      <div style={{ 
-        display: "flex", 
-        gap: "10px", 
-        marginBottom: "30px",
-        borderBottom: "2px solid #dee2e6"
-      }}>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">Admin Dashboard</h1>
+
+        {/* Tabs */}
+        <div className="flex flex-wrap gap-2 border-b border-gray-200 dark:border-gray-800 mb-6" role="tablist">
         {[
           { key: 'overview', label: 'Overview' },
           { key: 'companies', label: 'Companies' },
           { key: 'users', label: 'Users' },
-          { key: 'jobs', label: 'Jobs' }
+            { key: 'jobs', label: 'Jobs' },
+            { key: 'roles', label: 'Roles' },
+            { key: 'jobtypes', label: 'Job Types' },
+            { key: 'companytypes', label: 'Company Types' }
         ].map(tab => (
           <button
             key={tab.key}
-            onClick={() => setActiveTab(tab.key as any)}
-            style={{
-              padding: "12px 24px",
-              border: "none",
-              backgroundColor: activeTab === tab.key ? "#007bff" : "transparent",
-              color: activeTab === tab.key ? "white" : "#333",
-              cursor: "pointer",
-              borderRadius: "4px 4px 0 0",
-              fontWeight: "bold",
-              transition: "all 0.3s ease"
-            }}
-            onMouseEnter={(e) => {
-              if (activeTab !== tab.key) {
-                e.currentTarget.style.backgroundColor = "#f8f9fa"
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (activeTab !== tab.key) {
-                e.currentTarget.style.backgroundColor = "transparent"
-              }
-            }}
-          >
-            {tab.label}
+              onClick={() => setActiveTab(tab.key as TabKey)}
+              role="tab"
+              aria-selected={activeTab === tab.key}
+              className={`px-4 py-2 rounded-t-md font-medium transition-colors outline outline-1 ${activeTab === tab.key ? 'bg-gray-900 text-white outline-gray-300 dark:outline-gray-700' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 outline-transparent'}`}
+            >
+              <span className="whitespace-nowrap">{tab.label}</span>
           </button>
         ))}
       </div>
 
-      {/* Overview Tab */}
+        {/* Overview */}
       {activeTab === 'overview' && (
-        <div>
-          <div style={{ 
-            display: "grid", 
-            gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", 
-            gap: "20px",
-            marginBottom: "30px"
-          }}>
-            <div style={{
-              backgroundColor: "#007bff",
-              color: "white",
-              padding: "20px",
-              borderRadius: "8px",
-              textAlign: "center"
-            }}>
-              <h3 style={{ margin: "0 0 10px 0" }}>Total Companies</h3>
-              <p style={{ fontSize: "32px", margin: "0", fontWeight: "bold" }}>
-                {companies.length}
-              </p>
+          <div className="grid gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="bg-blue-600 text-white rounded-xl p-6 shadow">
+                <h3 className="text-sm opacity-90">Total Companies</h3>
+                <p className="text-3xl font-bold">{companies.length}</p>
+              </div>
+              <div className="bg-green-600 text-white rounded-xl p-6 shadow">
+                <h3 className="text-sm opacity-90">Total Users</h3>
+                <p className="text-3xl font-bold">{users.length}</p>
             </div>
-            
-            <div style={{
-              backgroundColor: "#28a745",
-              color: "white",
-              padding: "20px",
-              borderRadius: "8px",
-              textAlign: "center"
-            }}>
-              <h3 style={{ margin: "0 0 10px 0" }}>Total Users</h3>
-              <p style={{ fontSize: "32px", margin: "0", fontWeight: "bold" }}>
-                {users.length}
-              </p>
+              <div className="bg-cyan-600 text-white rounded-xl p-6 shadow">
+                <h3 className="text-sm opacity-90">Total Jobs</h3>
+                <p className="text-3xl font-bold">{jobs.length}</p>
             </div>
-            
-            <div style={{
-              backgroundColor: "#17a2b8",
-              color: "white",
-              padding: "20px",
-              borderRadius: "8px",
-              textAlign: "center"
-            }}>
-              <h3 style={{ margin: "0 0 10px 0" }}>Total Jobs</h3>
-              <p style={{ fontSize: "32px", margin: "0", fontWeight: "bold" }}>
-                {jobs.length}
-              </p>
+              <div className="bg-amber-400 text-black rounded-xl p-6 shadow">
+                <h3 className="text-sm opacity-90">Active Jobs</h3>
+                <p className="text-3xl font-bold">{jobs.filter(j => j.isactive).length}</p>
             </div>
-            
-            <div style={{
-              backgroundColor: "#ffc107",
-              color: "#000",
-              padding: "20px",
-              borderRadius: "8px",
-              textAlign: "center"
-            }}>
-              <h3 style={{ margin: "0 0 10px 0" }}>Active Jobs</h3>
-              <p style={{ fontSize: "32px", margin: "0", fontWeight: "bold" }}>
-                {jobs.filter(job => job.isactive).length}
-              </p>
             </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="bg-white/90 dark:bg-gray-900/90 border border-gray-200/60 dark:border-gray-800/60 rounded-xl p-6">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Recent Companies</h3>
+                <div className="divide-y divide-gray-200 dark:divide-gray-800">
+                  {companies.slice(0,5).map(c => (
+                    <div key={c.id} className="py-3 flex items-center justify-between">
+                      <span className="font-medium text-gray-900 dark:text-white">{c.name}</span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">{new Date(c.created).toLocaleDateString()}</span>
           </div>
-
-          <div style={{ 
-            display: "grid", 
-            gridTemplateColumns: "1fr 1fr", 
-            gap: "20px" 
-          }}>
-            <div style={{
-              backgroundColor: "white",
-              padding: "20px",
-              borderRadius: "8px",
-              border: "1px solid #dee2e6"
-            }}>
-              <h3 style={{ margin: "0 0 15px 0", color: "#333" }}>Recent Companies</h3>
-              {companies.slice(0, 5).map(company => (
-                <div key={company.id} style={{
-                  padding: "10px",
-                  borderBottom: "1px solid #eee",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center"
-                }}>
-                  <span style={{ fontWeight: "500" }}>{company.name}</span>
-                  <span style={{ fontSize: "12px", color: "#666" }}>
-                    {new Date(company.created).toLocaleDateString()}
-                  </span>
+                  ))}
                 </div>
-              ))}
             </div>
-
-            <div style={{
-              backgroundColor: "white",
-              padding: "20px",
-              borderRadius: "8px",
-              border: "1px solid #dee2e6"
-            }}>
-              <h3 style={{ margin: "0 0 15px 0", color: "#333" }}>Recent Jobs</h3>
-              {jobs.slice(0, 5).map(job => (
-                <div key={job.id} style={{
-                  padding: "10px",
-                  borderBottom: "1px solid #eee",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center"
-                }}>
-                  <span style={{ fontWeight: "500" }}>{job.title}</span>
-                  <span style={{ fontSize: "12px", color: "#666" }}>
-                    {job.company.name}
-                  </span>
+              <div className="bg-white/90 dark:bg-gray-900/90 border border-gray-200/60 dark:border-gray-800/60 rounded-xl p-6">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Recent Jobs</h3>
+                <div className="divide-y divide-gray-200 dark:divide-gray-800">
+                  {jobs.slice(0,5).map(j => (
+                    <div key={j.id} className="py-3 flex items-center justify-between">
+                      <span className="font-medium text-gray-900 dark:text-white">{j.title}</span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">{j.company.name}</span>
                 </div>
               ))}
+                </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Companies Tab */}
+        {/* Companies */}
       {activeTab === 'companies' && (
-        <div>
-          <div style={{ 
-            display: "flex", 
-            justifyContent: "space-between", 
-            alignItems: "center",
-            marginBottom: "20px"
-          }}>
-            <h2 style={{ margin: "0", color: "#333" }}>Companies Management</h2>
-            <Link 
-              to="/create-company"
-              style={{
-                padding: "10px 20px",
-                backgroundColor: "#28a745",
-                color: "white",
-                textDecoration: "none",
-                borderRadius: "4px",
-                fontWeight: "bold"
-              }}
-            >
-              Create Company
-            </Link>
+          <div className="grid gap-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Companies Management</h2>
+              <Link to="/create-company" className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md font-medium">Create Company</Link>
           </div>
-
-          <div style={{ 
-            backgroundColor: "white", 
-            borderRadius: "8px", 
-            border: "1px solid #dee2e6",
-            overflow: "hidden"
-          }}>
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead style={{ backgroundColor: "#f8f9fa" }}>
-                <tr>
-                  <th style={{ padding: "15px", textAlign: "left", borderBottom: "1px solid #dee2e6" }}>Name</th>
-                  <th style={{ padding: "15px", textAlign: "left", borderBottom: "1px solid #dee2e6" }}>Email</th>
-                  <th style={{ padding: "15px", textAlign: "left", borderBottom: "1px solid #dee2e6" }}>Website</th>
-                  <th style={{ padding: "15px", textAlign: "left", borderBottom: "1px solid #dee2e6" }}>Post Limit</th>
-                  <th style={{ padding: "15px", textAlign: "left", borderBottom: "1px solid #dee2e6" }}>Status</th>
-                  <th style={{ padding: "15px", textAlign: "left", borderBottom: "1px solid #dee2e6" }}>Actions</th>
+            <div className="bg-white/90 dark:bg-gray-900/90 border border-gray-200/60 dark:border-gray-800/60 rounded-xl overflow-hidden">
+              <table className="w-full">
+                <thead className="bg-gray-50 dark:bg-gray-800/50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Name</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Email</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Website</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Post Limit</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Status</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Actions</th>
                 </tr>
               </thead>
-              <tbody>
+                <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                 {companies.map(company => (
-                  <tr key={company.id}>
-                    <td style={{ padding: "15px", borderBottom: "1px solid #eee" }}>
+                    <tr key={company.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/40">
+                      <td className="px-4 py-3 text-gray-900 dark:text-white">
+                        <div className="flex items-center gap-2">
                       {company.logo && (
-                        <img 
-                          src={company.logo} 
-                          alt={`${company.name} logo`}
-                          style={{ width: "30px", height: "30px", marginRight: "10px", verticalAlign: "middle" }}
-                        />
+                            <img src={company.logo} alt={company.name} className="w-6 h-6 rounded" />
                       )}
                       {company.name}
+                        </div>
                     </td>
-                    <td style={{ padding: "15px", borderBottom: "1px solid #eee" }}>{company.email}</td>
-                    <td style={{ padding: "15px", borderBottom: "1px solid #eee" }}>
-                      {company.website ? (
-                        <a href={company.website} target="_blank" rel="noopener noreferrer">
-                          {company.website}
-                        </a>
-                      ) : "N/A"}
+                      <td className="px-4 py-3 text-gray-700 dark:text-gray-300">{company.email}</td>
+                      <td className="px-4 py-3 text-blue-600 dark:text-blue-400">
+                        {company.website ? <a href={company.website} target="_blank" rel="noreferrer">{company.website}</a> : 'N/A'}
                     </td>
-                    <td style={{ padding: "15px", borderBottom: "1px solid #eee" }}>{company.postlimit}</td>
-                    <td style={{ padding: "15px", borderBottom: "1px solid #eee" }}>
-                      <span style={{
-                        padding: "4px 8px",
-                        borderRadius: "4px",
-                        fontSize: "12px",
-                        fontWeight: "bold",
-                        backgroundColor: company.blacklisted ? "#dc3545" : "#28a745",
-                        color: "white"
-                      }}>
-                        {company.blacklisted ? "Blacklisted" : "Active"}
+                      <td className="px-4 py-3 text-gray-700 dark:text-gray-300">{company.postlimit}</td>
+                      <td className="px-4 py-3">
+                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${company.blacklisted ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'}`}>
+                          {company.blacklisted ? 'Blacklisted' : 'Active'}
                       </span>
                     </td>
-                    <td style={{ padding: "15px", borderBottom: "1px solid #eee" }}>
-                      <div style={{ display: "flex", gap: "5px" }}>
-                        <button
-                          onClick={() => handleBlacklistCompany(company.id, !company.blacklisted)}
-                          style={{
-                            padding: "4px 8px",
-                            fontSize: "12px",
-                            border: "none",
-                            borderRadius: "4px",
-                            cursor: "pointer",
-                            backgroundColor: company.blacklisted ? "#28a745" : "#ffc107",
-                            color: company.blacklisted ? "white" : "#000"
-                          }}
-                        >
-                          {company.blacklisted ? "Unblacklist" : "Blacklist"}
+                      <td className="px-4 py-3">
+                        <div className="flex gap-2">
+                          <button onClick={() => handleBlacklistCompany(company.id, !company.blacklisted)} className={`px-3 py-1 rounded-md text-sm font-medium ${company.blacklisted ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-amber-400 hover:bg-amber-500 text-black'}`}>
+                            {company.blacklisted ? 'Unblacklist' : 'Blacklist'}
                         </button>
-                        <button
-                          onClick={() => handleDeleteCompany(company.id)}
-                          style={{
-                            padding: "4px 8px",
-                            fontSize: "12px",
-                            border: "none",
-                            borderRadius: "4px",
-                            cursor: "pointer",
-                            backgroundColor: "#dc3545",
-                            color: "white"
-                          }}
-                        >
-                          Delete
-                        </button>
+                          <button onClick={() => handleDeleteCompany(company.id)} className="px-3 py-1 rounded-md text-sm font-medium bg-red-600 hover:bg-red-700 text-white">Delete</button>
                       </div>
                     </td>
                   </tr>
@@ -418,55 +456,70 @@ export const AdminDashboard = function () {
         </div>
       )}
 
-      {/* Users Tab */}
+        {/* Users */}
       {activeTab === 'users' && (
-        <div>
-          <h2 style={{ margin: "0 0 20px 0", color: "#333" }}>Users Management</h2>
-          
-          <div style={{ 
-            backgroundColor: "white", 
-            borderRadius: "8px", 
-            border: "1px solid #dee2e6",
-            overflow: "hidden"
-          }}>
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead style={{ backgroundColor: "#f8f9fa" }}>
-                <tr>
-                  <th style={{ padding: "15px", textAlign: "left", borderBottom: "1px solid #dee2e6" }}>Name</th>
-                  <th style={{ padding: "15px", textAlign: "left", borderBottom: "1px solid #dee2e6" }}>Email</th>
-                  <th style={{ padding: "15px", textAlign: "left", borderBottom: "1px solid #dee2e6" }}>Phone</th>
-                  <th style={{ padding: "15px", textAlign: "left", borderBottom: "1px solid #dee2e6" }}>Company</th>
-                  <th style={{ padding: "15px", textAlign: "left", borderBottom: "1px solid #dee2e6" }}>Joined</th>
-                  <th style={{ padding: "15px", textAlign: "left", borderBottom: "1px solid #dee2e6" }}>Actions</th>
+          <div className="grid gap-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Users Management</h2>
+              <div className="flex items-center gap-2">
+                <input
+                  value={userSearch}
+                  onChange={(e) => setUserSearch(e.target.value)}
+                  placeholder="Search by name or email"
+                  className="px-3 py-2 rounded-md bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-white"
+                />
+                <button disabled={usersPage === 1} onClick={() => setUsersPage(p => Math.max(1, p - 1))} className="px-3 py-1 rounded-md bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-gray-200 disabled:opacity-50">Prev</button>
+                <span className="text-gray-700 dark:text-gray-300">Page {usersPage}</span>
+                <button onClick={() => setUsersPage(p => p + 1)} className="px-3 py-1 rounded-md bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-gray-200">Next</button>
+              </div>
+            </div>
+            <div className="bg-white/90 dark:bg-gray-900/90 border border-gray-200/60 dark:border-gray-800/60 rounded-xl overflow-hidden">
+              <table className="w-full">
+                <thead className="bg-gray-50 dark:bg-gray-800/50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Name</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Email</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Phone</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Company</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Joined</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Role</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Actions</th>
                 </tr>
               </thead>
-              <tbody>
-                {users.map(user => (
-                  <tr key={user.id}>
-                    <td style={{ padding: "15px", borderBottom: "1px solid #eee" }}>{user.name}</td>
-                    <td style={{ padding: "15px", borderBottom: "1px solid #eee" }}>{user.email}</td>
-                    <td style={{ padding: "15px", borderBottom: "1px solid #eee" }}>{user.phone || "N/A"}</td>
-                    <td style={{ padding: "15px", borderBottom: "1px solid #eee" }}>
-                      {user.companyId ? "Associated" : "Independent"}
+                <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                  {users
+                    .filter(u => {
+                      const q = userSearch.trim().toLowerCase()
+                      if (!q) return true
+                      return (
+                        (u.name || '').toLowerCase().includes(q) ||
+                        (u.email || '').toLowerCase().includes(q)
+                      )
+                    })
+                    .map(user => (
+                    <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/40">
+                      <td className="px-4 py-3 text-gray-900 dark:text-white">{user.name}</td>
+                      <td className="px-4 py-3 text-gray-700 dark:text-gray-300">{user.email}</td>
+                      <td className="px-4 py-3 text-gray-700 dark:text-gray-300">{user.phone || 'N/A'}</td>
+                      <td className="px-4 py-3 text-gray-700 dark:text-gray-300">{user.companyId ? 'Associated' : 'Independent'}</td>
+                      <td className="px-4 py-3 text-gray-700 dark:text-gray-300">{new Date(user.created).toLocaleDateString()}</td>
+                      <td className="px-4 py-3">
+                        <select
+                          value={pendingUserRoles[user.id] ?? user.roleId ?? ''}
+                          onChange={(e) => setPendingUserRoles(s => ({ ...s, [user.id]: e.target.value }))}
+                          className="px-2 py-1 rounded-md bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-white"
+                        >
+                          <option value="">Select role</option>
+                          {roles.map(r => (
+                            <option key={r.id} value={r.id}>{r.name}</option>
+                          ))}
+                        </select>
                     </td>
-                    <td style={{ padding: "15px", borderBottom: "1px solid #eee" }}>
-                      {new Date(user.created).toLocaleDateString()}
-                    </td>
-                    <td style={{ padding: "15px", borderBottom: "1px solid #eee" }}>
-                      <button
-                        onClick={() => handleDeleteUser(user.id)}
-                        style={{
-                          padding: "4px 8px",
-                          fontSize: "12px",
-                          border: "none",
-                          borderRadius: "4px",
-                          cursor: "pointer",
-                          backgroundColor: "#dc3545",
-                          color: "white"
-                        }}
-                      >
-                        Delete
-                      </button>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2">
+                          <button onClick={() => updateUserRole(user.id, (pendingUserRoles[user.id] ?? user.roleId) || '')} className="inline-block px-3 py-1 rounded-md text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white whitespace-nowrap border border-blue-700">Save</button>
+                          <button onClick={() => handleDeleteUser(user.id)} className="px-3 py-1 rounded-md text-sm font-medium bg-red-600 hover:bg-red-700 text-white">Delete</button>
+                        </div>
                     </td>
                   </tr>
                 ))}
@@ -476,82 +529,41 @@ export const AdminDashboard = function () {
         </div>
       )}
 
-      {/* Jobs Tab */}
+        {/* Jobs */}
       {activeTab === 'jobs' && (
-        <div>
-          <h2 style={{ margin: "0 0 20px 0", color: "#333" }}>Jobs Management</h2>
-          
-          <div style={{ 
-            backgroundColor: "white", 
-            borderRadius: "8px", 
-            border: "1px solid #dee2e6",
-            overflow: "hidden"
-          }}>
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead style={{ backgroundColor: "#f8f9fa" }}>
-                <tr>
-                  <th style={{ padding: "15px", textAlign: "left", borderBottom: "1px solid #dee2e6" }}>Title</th>
-                  <th style={{ padding: "15px", textAlign: "left", borderBottom: "1px solid #dee2e6" }}>Company</th>
-                  <th style={{ padding: "15px", textAlign: "left", borderBottom: "1px solid #dee2e6" }}>Views</th>
-                  <th style={{ padding: "15px", textAlign: "left", borderBottom: "1px solid #dee2e6" }}>Applications</th>
-                  <th style={{ padding: "15px", textAlign: "left", borderBottom: "1px solid #dee2e6" }}>Status</th>
-                  <th style={{ padding: "15px", textAlign: "left", borderBottom: "1px solid #dee2e6" }}>Actions</th>
+          <div className="grid gap-4">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Jobs Management</h2>
+            <div className="bg-white/90 dark:bg-gray-900/90 border border-gray-200/60 dark:border-gray-800/60 rounded-xl overflow-hidden">
+              <table className="w-full">
+                <thead className="bg-gray-50 dark:bg-gray-800/50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Title</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Company</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Views</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Applications</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Status</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Actions</th>
                 </tr>
               </thead>
-              <tbody>
+                <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                 {jobs.map(job => (
-                  <tr key={job.id}>
-                    <td style={{ padding: "15px", borderBottom: "1px solid #eee" }}>
-                      <Link 
-                        to={`/job/${job.id}`}
-                        style={{ color: "#007bff", textDecoration: "none" }}
-                      >
-                        {job.title}
-                      </Link>
+                    <tr key={job.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/40">
+                      <td className="px-4 py-3">
+                        <Link to={`/job/${job.id}`} className="text-blue-600 dark:text-blue-400 hover:underline">{job.title}</Link>
                     </td>
-                    <td style={{ padding: "15px", borderBottom: "1px solid #eee" }}>{job.company.name}</td>
-                    <td style={{ padding: "15px", borderBottom: "1px solid #eee" }}>{job.viewscount}</td>
-                    <td style={{ padding: "15px", borderBottom: "1px solid #eee" }}>{job.applicationscount}</td>
-                    <td style={{ padding: "15px", borderBottom: "1px solid #eee" }}>
-                      <span style={{
-                        padding: "4px 8px",
-                        borderRadius: "4px",
-                        fontSize: "12px",
-                        fontWeight: "bold",
-                        backgroundColor: job.isactive ? "#28a745" : "#dc3545",
-                        color: "white"
-                      }}>
-                        {job.isactive ? "Active" : "Inactive"}
-                      </span>
-                      {job.isfeatured && (
-                        <span style={{
-                          padding: "4px 8px",
-                          borderRadius: "4px",
-                          fontSize: "12px",
-                          fontWeight: "bold",
-                          backgroundColor: "#ffc107",
-                          color: "#000",
-                          marginLeft: "5px"
-                        }}>
-                          Featured
+                      <td className="px-4 py-3 text-gray-700 dark:text-gray-300">{job.company.name}</td>
+                      <td className="px-4 py-3 text-gray-700 dark:text-gray-300">{job.viewscount}</td>
+                      <td className="px-4 py-3 text-gray-700 dark:text-gray-300">{job.applicationscount}</td>
+                      <td className="px-4 py-3">
+                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${job.isactive ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'}`}>
+                          {job.isactive ? 'Active' : 'Inactive'}
                         </span>
+                        {job.isfeatured && (
+                          <span className="ml-2 px-2 py-1 rounded-full text-xs font-semibold bg-amber-400 text-black">Featured</span>
                       )}
                     </td>
-                    <td style={{ padding: "15px", borderBottom: "1px solid #eee" }}>
-                      <button
-                        onClick={() => handleDeleteJob(job.id)}
-                        style={{
-                          padding: "4px 8px",
-                          fontSize: "12px",
-                          border: "none",
-                          borderRadius: "4px",
-                          cursor: "pointer",
-                          backgroundColor: "#dc3545",
-                          color: "white"
-                        }}
-                      >
-                        Delete
-                      </button>
+                      <td className="px-4 py-3">
+                        <button onClick={() => handleDeleteJob(job.id)} className="px-3 py-1 rounded-md text-sm font-medium bg-red-600 hover:bg-red-700 text-white">Delete</button>
                     </td>
                   </tr>
                 ))}
@@ -560,6 +572,104 @@ export const AdminDashboard = function () {
           </div>
         </div>
       )}
+
+        {/* Roles */}
+        {activeTab === 'roles' && (
+          <div className="grid gap-4">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Roles</h2>
+            <div className="bg-white/90 dark:bg-gray-900/90 border border-gray-200/60 dark:border-gray-800/60 rounded-xl overflow-hidden">
+              <table className="w-full">
+                <thead className="bg-gray-50 dark:bg-gray-800/50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Name</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Code</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                  {roles.map(r => (
+                    <tr key={r.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/40">
+                      <td className="px-4 py-3 text-gray-900 dark:text-white">{r.name}</td>
+                      <td className="px-4 py-3 text-gray-700 dark:text-gray-300">{r.code}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* Job Types */}
+        {activeTab === 'jobtypes' && (
+          <div className="grid gap-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Job Types</h2>
+              <div className="flex items-center gap-2">
+                <input value={newJobType.name} onChange={(e) => setNewJobType(s => ({ ...s, name: e.target.value }))} placeholder="Name" className="px-3 py-2 rounded-md bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-white" />
+                <input value={newJobType.description} onChange={(e) => setNewJobType(s => ({ ...s, description: e.target.value }))} placeholder="Description" className="px-3 py-2 rounded-md bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-white" />
+                <button onClick={createJobType} className="px-3 py-2 rounded-md bg-gray-900 dark:bg-white text-white dark:text-gray-900">Add</button>
+              </div>
+            </div>
+            <div className="bg-white/90 dark:bg-gray-900/90 border border-gray-200/60 dark:border-gray-800/60 rounded-xl overflow-hidden">
+              <table className="w-full">
+                <thead className="bg-gray-50 dark:bg-gray-800/50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Name</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Description</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                  {jobTypes.map(jt => (
+                    <tr key={jt.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/40">
+                      <td className="px-4 py-3 text-gray-900 dark:text-white">{jt.name}</td>
+                      <td className="px-4 py-3 text-gray-700 dark:text-gray-300">{jt.description || ''}</td>
+                      <td className="px-4 py-3">
+                        <button onClick={() => deleteJobType(jt.id)} className="px-3 py-1 rounded-md text-sm font-medium bg-red-600 hover:bg-red-700 text-white">Delete</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* Company Types */}
+        {activeTab === 'companytypes' && (
+          <div className="grid gap-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Company Types</h2>
+              <div className="flex items-center gap-2">
+                <input value={newCompanyType.name} onChange={(e) => setNewCompanyType(s => ({ ...s, name: e.target.value }))} placeholder="Name" className="px-3 py-2 rounded-md bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-white" />
+                <input value={newCompanyType.description} onChange={(e) => setNewCompanyType(s => ({ ...s, description: e.target.value }))} placeholder="Description" className="px-3 py-2 rounded-md bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-white" />
+                <button onClick={createCompanyType} className="px-3 py-2 rounded-md bg-gray-900 dark:bg-white text-white dark:text-gray-900">Add</button>
+              </div>
+            </div>
+            <div className="bg-white/90 dark:bg-gray-900/90 border border-gray-200/60 dark:border-gray-800/60 rounded-xl overflow-hidden">
+              <table className="w-full">
+                <thead className="bg-gray-50 dark:bg-gray-800/50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Name</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Description</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                  {companyTypes.map(ct => (
+                    <tr key={ct.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/40">
+                      <td className="px-4 py-3 text-gray-900 dark:text-white">{ct.name}</td>
+                      <td className="px-4 py-3 text-gray-700 dark:text-gray-300">{ct.description || ''}</td>
+                      <td className="px-4 py-3">
+                        <button onClick={() => deleteCompanyType(ct.id)} className="px-3 py-1 rounded-md text-sm font-medium bg-red-600 hover:bg-red-700 text-white">Delete</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

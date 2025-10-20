@@ -5,6 +5,7 @@ import { BACKEND_URL, getToken } from "../config"
 import { useUser } from "../contexts/userContext"
 import { Building2, Plus, ArrowLeft, Eye, Edit, Trash2, Calendar, Globe, Mail, Hash, AlertCircle } from "lucide-react"
 import toast from "react-hot-toast"
+import { ConfirmModal } from "../components/ConfirmModal"
 
 interface Company {
   id: string
@@ -24,6 +25,8 @@ export const MyCompanies = function () {
   const [companies, setCompanies] = useState<Company[]>([])
   const [loading, setLoading] = useState<boolean>(true)
   const hasFetched = useRef(false)
+
+  const [confirmState, setConfirmState] = useState<{ open: boolean, title: string, message: string, onConfirm: () => Promise<void> | void } | null>(null)
 
   const fetchUserCompanies = async () => {
     if (hasFetched.current) return; // Prevent multiple requests
@@ -70,8 +73,6 @@ export const MyCompanies = function () {
     }
   }, [user.userId, userLoading])
 
-  // Removed empty useEffect that was causing infinite loop
-
   const refreshCompanies = () => {
     hasFetched.current = false
     setCompanies([])
@@ -81,23 +82,27 @@ export const MyCompanies = function () {
   }
 
   const handleDeleteCompany = async (companyId: string) => {
-    if (window.confirm("Are you sure you want to delete this company? This action cannot be undone.")) {
-      try {
-        await axios.delete(`${BACKEND_URL}/company/${companyId}`, {
-          headers: {
-            Authorization: getToken(),
-          },
-        })
-        refreshCompanies()
-        toast.success("Company deleted successfully! 🗑️")
-      } catch (error) {
-        console.error("Error deleting company:", error)
-        toast.error("Failed to delete company. Please try again.")
+    setConfirmState({
+      open: true,
+      title: 'Delete Company',
+      message: 'Are you sure you want to delete this company? This action cannot be undone.',
+      onConfirm: async () => {
+        try {
+          await axios.delete(`${BACKEND_URL}/company/${companyId}`, {
+            headers: {
+              Authorization: getToken(),
+            },
+          })
+          toast.success('Company deleted successfully')
+          refreshCompanies()
+        } catch (error: any) {
+          toast.error(error?.response?.data?.message || 'Failed to delete company')
+        } finally {
+          setConfirmState(null)
+        }
       }
-    }
+    })
   }
-
-
 
   if (loading) {
     return (
@@ -123,6 +128,15 @@ export const MyCompanies = function () {
       </div>
 
       <div className="relative z-10 p-6 lg:p-8 min-h-full">
+        <ConfirmModal
+          open={!!confirmState?.open}
+          title={confirmState?.title || ''}
+          message={confirmState?.message || ''}
+          confirmText="Confirm"
+          confirmVariant="danger"
+          onConfirm={() => confirmState?.onConfirm?.()}
+          onCancel={() => setConfirmState(null)}
+        />
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="mb-8">
@@ -150,17 +164,15 @@ export const MyCompanies = function () {
                   </div>
                 </div>
               </div>
-              
               <Link 
                 to="/create-company"
-                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white rounded-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-md font-medium"
               >
                 <Plus className="w-5 h-5" />
                 Create New Company
               </Link>
             </div>
           </div>
-
 
           {(companies || []).length === 0 ? (
             <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-xl border border-gray-200/60 dark:border-gray-800/60 shadow-lg p-12 text-center">
@@ -173,7 +185,7 @@ export const MyCompanies = function () {
               </p>
               <Link 
                 to="/create-company" 
-                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white rounded-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-md font-medium"
               >
                 <Plus className="w-5 h-5" />
                 Create Your First Company
@@ -238,7 +250,6 @@ export const MyCompanies = function () {
                             )}
                           </div>
                         </div>
-                        
                         <div className="text-right text-sm text-gray-500 dark:text-gray-400">
                           <div className="flex items-center gap-2 mb-1">
                             <Calendar className="w-4 h-4" />
@@ -257,42 +268,11 @@ export const MyCompanies = function () {
                         </div>
                       </div>
 
-                      {/* Stats Cards */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                        <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800/60">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/40 rounded-lg flex items-center justify-center">
-                              <Hash className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                            </div>
-                            <div>
-                              <p className="text-sm text-gray-600 dark:text-gray-400">Job Posting Limit</p>
-                              <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                                {company.postlimit || "Not set"}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 border border-green-200 dark:border-green-800/60">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-green-100 dark:bg-green-900/40 rounded-lg flex items-center justify-center">
-                              <Building2 className="w-5 h-5 text-green-600 dark:text-green-400" />
-                            </div>
-                            <div>
-                              <p className="text-sm text-gray-600 dark:text-gray-400">Status</p>
-                              <p className={`text-2xl font-bold ${company.blacklisted ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}>
-                                {company.blacklisted ? "Blacklisted" : "Active"}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
                       {/* Action Buttons */}
                       <div className="flex flex-wrap gap-3">
                         <Link 
                           to={`/company/${company.id}/jobs`}
-                          className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors duration-200"
+                          className="flex items-center gap-2 px-3 py-1.5 border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 rounded-md text-sm"
                         >
                           <Eye className="w-4 h-4" />
                           View Jobs
@@ -300,7 +280,7 @@ export const MyCompanies = function () {
                         
                         <Link 
                           to={`/company/${company.id}/post-job`}
-                          className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors duration-200"
+                          className="flex items-center gap-2 px-3 py-1.5 border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 rounded-md text-sm"
                         >
                           <Plus className="w-4 h-4" />
                           Post New Job
@@ -308,7 +288,7 @@ export const MyCompanies = function () {
                         
                         <button
                           onClick={() => navigate(`/company/${company.id}/edit`)}
-                          className="flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors duration-200"
+                          className="flex items-center gap-2 px-3 py-1.5 border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 rounded-md text-sm"
                         >
                           <Edit className="w-4 h-4" />
                           Edit Company
@@ -316,7 +296,7 @@ export const MyCompanies = function () {
                         
                         <button
                           onClick={() => handleDeleteCompany(company.id)}
-                          className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors duration-200"
+                          className="flex items-center gap-2 px-3 py-1.5 border border-red-300 text-red-700 bg-white hover:bg-red-50 rounded-md text-sm"
                         >
                           <Trash2 className="w-4 h-4" />
                           Delete Company
