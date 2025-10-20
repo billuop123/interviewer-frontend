@@ -11,7 +11,7 @@ interface Application {
   notes: string | null
   relevancescore: number | null
   relevancecomment: string | null
-  videoLink: string | null
+  videolink: string | null
   created: string
   updated: string | null
   user: {
@@ -280,7 +280,7 @@ export const ApplicationDetails = function () {
               )}
 
               {/* Interview Video */}
-              {application.videoLink && (
+              {application.videolink && (
                 <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-xl border border-gray-200/60 dark:border-gray-800/60 shadow-lg p-6">
                   <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                     <Video className="w-5 h-5" />
@@ -298,7 +298,7 @@ export const ApplicationDetails = function () {
                       </p>
                       <div className="flex gap-3">
                         <button
-                          onClick={() => window.open(application.videoLink, '_blank')}
+                          onClick={() => window.open(application.videolink, '_blank')}
                           className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors duration-200"
                         >
                           <Play className="w-4 h-4" />
@@ -307,7 +307,7 @@ export const ApplicationDetails = function () {
                         <button
                           onClick={() => {
                             const link = document.createElement('a')
-                            link.href = application.videoLink!
+                            link.href = application.videolink!
                             link.download = `interview-${application.user.name || application.user.email}-${application.id}.mp4`
                             link.click()
                           }}

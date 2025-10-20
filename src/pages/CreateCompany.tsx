@@ -36,6 +36,7 @@ export const CreateCompany = function () {
   const validateForm = (): boolean => {
     const newErrors: string[] = []
     
+    // Required field validations
     if (!formData.name.trim()) {
       newErrors.push("Company name is required")
     }
@@ -46,8 +47,13 @@ export const CreateCompany = function () {
       newErrors.push("Please enter a valid email address")
     }
     
+    // Format validations (only if fields are filled)
     if (formData.website && !/^https?:\/\/.+/.test(formData.website)) {
       newErrors.push("Website must start with http:// or https://")
+    }
+    
+    if (formData.logo && !/^https?:\/\/.+/.test(formData.logo)) {
+      newErrors.push("Logo URL must start with http:// or https://")
     }
     
     if (formData.postlimit < 1) {

@@ -155,6 +155,26 @@ export const UserDetails = function () {
   const validateForm = (): boolean => {
     const newErrors: string[] = []
     
+    // Required field validations
+    if (!formData.bio.trim()) {
+      newErrors.push("Bio is required")
+    }
+    
+    if (!formData.location.trim()) {
+      newErrors.push("Location is required")
+    }
+    
+    if (!formData.experience.trim()) {
+      newErrors.push("Years of experience is required")
+    } else if (isNaN(parseInt(formData.experience)) || parseInt(formData.experience) < 0 || parseInt(formData.experience) > 50) {
+      newErrors.push("Experience must be a valid number between 0 and 50 years")
+    }
+    
+    if (formData.skills.length === 0) {
+      newErrors.push("At least one skill is required")
+    }
+    
+    // Format validations (only if fields are filled)
     if (formData.phone && !/^\+?[\d\s\-\(\)]+$/.test(formData.phone)) {
       newErrors.push("Please enter a valid phone number")
     }
@@ -169,10 +189,6 @@ export const UserDetails = function () {
     
     if (formData.github && !/^https?:\/\/(www\.)?github\.com\/.+/.test(formData.github)) {
       newErrors.push("GitHub URL must be a valid GitHub profile link")
-    }
-    
-    if (formData.experience && (parseInt(formData.experience) < 0 || parseInt(formData.experience) > 50)) {
-      newErrors.push("Experience must be between 0 and 50 years")
     }
     
     if (formData.expected_salary && (parseInt(formData.expected_salary) < 0 || parseInt(formData.expected_salary) > 1000000)) {
@@ -224,9 +240,14 @@ export const UserDetails = function () {
         setUserDetails(response.data.result)
         toast.success("Profile updated successfully! 🎉")
         setErrors([])
-        // Small delay to show the toast before navigating
+        // Small delay to show the toast before navigating back one level
         setTimeout(() => {
-          navigate('/dashboard')
+          // Go back one level in browser history, fallback to dashboard if no history
+          if (window.history.length > 1) {
+            navigate(-1)
+          } else {
+            navigate('/dashboard')
+          }
         }, 1000)
       }
     } catch (error: any) {

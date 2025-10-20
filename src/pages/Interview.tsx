@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { BACKEND_URL, getToken } from "../config"
+import { useUser } from "../contexts/userContext"
 import toast from "react-hot-toast"
 import { 
   Play, 
@@ -19,6 +20,7 @@ interface Message {
 export const Interview = function () {
   const { jobId, applicationId } = useParams<{ jobId: string, applicationId: string }>()
   const navigate = useNavigate()
+  const { user } = useUser()
   
   // Core states
   const [isRecording, setIsRecording] = useState<boolean>(false)
@@ -46,81 +48,56 @@ export const Interview = function () {
   // Fetch resume content and check existing results when component mounts
   useEffect(() => {
     const fetchResume = async () => {
-      if (!applicationId) return
+      if (!applicationId || !user.userId) return
       
       try {
-        // First get current user profile to get userId
-        const profileResponse = await fetch(`${BACKEND_URL}/users/profile`, {
+        
+        // Get user details using the userId from context
+        const userDetailsResponse = await fetch(`${BACKEND_URL}/userdetails/getuserdetails/${user.userId}`, {
           method: "GET",
           headers: {
             Authorization: getToken() || "",
           },
         })
         
-        if (profileResponse.ok) {
-          const profileData = await profileResponse.json()
-          const userId = profileData.id
+        if (userDetailsResponse.ok) {
+          const userDetailsData = await userDetailsResponse.json()
+          // Check if there's a resume link in the user details
+          const resumeLink = userDetailsData.result?.resumelink
           
-          if (userId) {
-            // Now get user details using the userId
-            const userDetailsResponse = await fetch(`${BACKEND_URL}/userdetails/getuserdetails/${userId}`, {
-              method: "GET",
+          if (resumeLink) {
+            // Parse the resume using the parseresume endpoint
+            const parseResponse = await fetch(`${BACKEND_URL}/application/parseresume`, {
+              method: "POST",
               headers: {
+                "Content-Type": "application/json",
                 Authorization: getToken() || "",
               },
+              body: JSON.stringify({
+                resumelink: resumeLink
+              }),
             })
             
-            if (userDetailsResponse.ok) {
-              const userDetailsData = await userDetailsResponse.json()
-              
-              // Check if there's a resume link in the user details
-              const resumeLink = userDetailsData.result?.resumelink
-              
-              if (resumeLink) {
-                // Parse the resume using the parseresume endpoint
-                const parseResponse = await fetch(`${BACKEND_URL}/application/parseresume`, {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                    Authorization: getToken() || "",
-                  },
-                  body: JSON.stringify({
-                    resumelink: resumeLink
-                  }),
-                })
-                
-                
-                if (parseResponse.ok) {
-                  const parseData = await parseResponse.json()
-                  const resume = parseData.resumeText || ""
-                  setResumeText(resume)
-                } else {
-                  console.warn("Resume parsing failed with status:", parseResponse.status)
-                  setResumeText("")
-                }
-              } else {
-                setResumeText("")
-              }
+            if (parseResponse.ok) {
+              const parseData = await parseResponse.json()
+              const resume = parseData.resumeText || ""
+              setResumeText(resume)
             } else {
-              console.warn("Could not fetch user details, status:", userDetailsResponse.status)
               setResumeText("")
             }
           } else {
-            console.warn("No userId found in profile")
             setResumeText("")
           }
         } else {
-          console.warn("Could not fetch user profile, status:", profileResponse.status)
           setResumeText("")
         }
       } catch (error) {
-        console.warn("Could not fetch resume content:", error)
         setResumeText("") // Continue without resume if fetch fails
       }
     }
     
     fetchResume()
-  }, [applicationId])
+  }, [applicationId, user.userId])
 
   // Check for existing interview results
   useEffect(() => {

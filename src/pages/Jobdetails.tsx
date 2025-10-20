@@ -64,7 +64,7 @@ interface Application {
   created: string
   relevancescore?: number
   relevancecomment?: string
-  videoLink?: string
+  videolink?: string
   user: {
     id: string
     email: string
@@ -514,7 +514,7 @@ export const Jobdetails = function () {
                                     Score: {application.relevancescore}/10
                                   </span>
                                 )}
-                                {application.videoLink ? (
+                                {application.videolink ? (
                                   <span className="px-2 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 rounded-full text-xs font-bold">
                                     Video
                                   </span>
@@ -562,11 +562,11 @@ export const Jobdetails = function () {
                                 <Mail className="w-3 h-3" />
                                 Contact
                               </button>
-                              {application.videoLink ? (
+                              {application.videolink ? (
                                 <button 
                                   onClick={(e) => {
                                     e.stopPropagation()
-                                    window.open(application.videoLink, '_blank')
+                                    window.open(application.videolink, '_blank')
                                   }}
                                   className="flex items-center gap-1 px-3 py-1 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 rounded-md text-sm hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors"
                                 >
