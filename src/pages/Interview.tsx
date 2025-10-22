@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react"
 import { useParams, useNavigate } from "react-router-dom"
-import { BACKEND_URL, getToken } from "../config"
+import { BACKEND_URL, getToken, WEBSOCKET_URL, WEBSOCKET_CONFIG } from "../config"
 import { useUser } from "../contexts/userContext"
 import toast from "react-hot-toast"
 import { 
@@ -35,6 +35,7 @@ export const Interview = function () {
   const [resumeText, setResumeText] = useState<string>("")
   const [micEnabled, setMicEnabled] = useState<boolean>(false)
   const [interviewResult, setInterviewResult] = useState<{score: number, reasoning: string} | null>(null)
+  const [connectionStatus, setConnectionStatus] = useState<'connecting' | 'connected' | 'disconnected' | 'failed'>('connecting')
   
   // Refs
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
@@ -44,7 +45,127 @@ export const Interview = function () {
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const silenceTimeoutRef = useRef<number | null>(null)
   const micEnabledRef = useRef<boolean>(false)
+  const websocketRef = useRef<WebSocket | null>(null)
+  const retryCountRef = useRef<number>(0)
+  const maxRetriesRef = useRef<number>(WEBSOCKET_CONFIG.maxRetries)
+  const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const isManualCloseRef = useRef<boolean>(false)
+  
+  const manualRetry = () => {
+    retryCountRef.current = 0 // Reset retry count for manual retry
+    setConnectionStatus('connecting')
+    
+    // Clear any existing timeout
+    if (retryTimeoutRef.current) {
+      clearTimeout(retryTimeoutRef.current)
+      retryTimeoutRef.current = null
+    }
+    
+    // Close existing connection if any
+    if (websocketRef.current) {
+      isManualCloseRef.current = true
+      websocketRef.current.close()
+      websocketRef.current = null
+      isManualCloseRef.current = false
+    }
+    
+    // Start new connection
+    connectWebSocket()
+  }
+  
+  const connectWebSocket = () => {
+    if (!applicationId || !user.userId) return
+    
+    setConnectionStatus('connecting')
+    
+    try {
+      websocketRef.current = new WebSocket(WEBSOCKET_URL)
+      
+      websocketRef.current.onopen = () => {
+        retryCountRef.current = 0 
+        setConnectionStatus('connected')
+        
+        websocketRef.current?.send(JSON.stringify({
+          event:'join',
+          userId:user.userId,
+          jobId:jobId,
+          name:user.name,
+        }))
+        
+        if (retryCountRef.current > 0) {
+          toast.success('Reconnected to interview server')
+        }
+      }
+      
+      websocketRef.current.onerror = (error) => {
+        console.error('WebSocket error:', error)
+        setConnectionStatus('failed')
+        if (retryCountRef.current === 0) {
+          toast.error('Failed to connect to interview server')
+        }
+      }
+      
+      websocketRef.current.onclose = (event) => {
+        // Don't retry if it was a manual close or normal closure
+        if (isManualCloseRef.current || event.code === 1000) {
+          return
+        }
+        
+        // Retry connection with exponential backoff
+        if (retryCountRef.current < maxRetriesRef.current) {
+          retryCountRef.current++
+          setConnectionStatus('connecting')
+          const delay = Math.min(WEBSOCKET_CONFIG.baseDelay * Math.pow(2, retryCountRef.current - 1), WEBSOCKET_CONFIG.maxDelay)
+          toast.error(`Connection lost. Retrying... (${retryCountRef.current}/${maxRetriesRef.current})`)
+          
+          retryTimeoutRef.current = setTimeout(() => {
+            connectWebSocket()
+          }, delay)
+        } else {
+          setConnectionStatus('failed')
+        }
+      }
+      
 
+      
+    } catch (error) {
+      console.error('Error creating WebSocket connection:', error)
+      toast.error('Failed to create WebSocket connection')
+    }
+  }
+  
+  useEffect(() => {
+    if (applicationId && user.userId) {
+      connectWebSocket()
+    }
+    
+    // Cleanup function
+    return () => {
+      isManualCloseRef.current = true
+      
+      // Clear any pending retry timeout
+      if (retryTimeoutRef.current) {
+        clearTimeout(retryTimeoutRef.current)
+        retryTimeoutRef.current = null
+      }
+      
+      // Close WebSocket connection
+      if (websocketRef.current) {
+        try {
+          websocketRef.current.send(JSON.stringify({
+            event:'leave',
+            userId:user.userId,
+            jobId:jobId,
+          }))
+        } catch (error) {
+          console.error('Error sending leave message:', error)
+        }
+        
+        websocketRef.current.close()
+        websocketRef.current = null
+      }
+    }
+  }, [applicationId, user.userId, jobId])
   // Fetch resume content and check existing results when component mounts
   useEffect(() => {
     const fetchResume = async () => {
@@ -640,6 +761,35 @@ export const Interview = function () {
           <div className="text-center">
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">AI Interview</h1>
             <p className="text-gray-600 dark:text-gray-400">Job ID: {jobId}</p>
+            
+            {/* Connection Status */}
+            <div className="flex items-center justify-center gap-2 mt-2">
+              <div className={`w-2 h-2 rounded-full ${
+                connectionStatus === 'connected' ? 'bg-green-500' :
+                connectionStatus === 'connecting' ? 'bg-yellow-500 animate-pulse' :
+                connectionStatus === 'disconnected' ? 'bg-gray-400' :
+                'bg-red-500'
+              }`}></div>
+              <span className={`text-xs font-medium ${
+                connectionStatus === 'connected' ? 'text-green-600 dark:text-green-400' :
+                connectionStatus === 'connecting' ? 'text-yellow-600 dark:text-yellow-400' :
+                connectionStatus === 'disconnected' ? 'text-gray-500 dark:text-gray-400' :
+                'text-red-600 dark:text-red-400'
+              }`}>
+                {connectionStatus === 'connected' ? 'Connected' :
+                 connectionStatus === 'connecting' ? 'Connecting...' :
+                 connectionStatus === 'disconnected' ? 'Disconnected' :
+                 'Connection Failed'}
+              </span>
+              {(connectionStatus === 'failed' || connectionStatus === 'disconnected') && (
+                <button
+                  onClick={manualRetry}
+                  className="ml-2 px-2 py-1 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors duration-200"
+                >
+                  Retry
+                </button>
+              )}
+            </div>
           </div>
           
           <div className="w-24"></div>

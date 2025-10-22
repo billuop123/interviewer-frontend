@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import axios from "axios"
 import { useNavigate, useParams } from "react-router-dom"
-import { BACKEND_URL, getToken } from "../config"
+import { BACKEND_URL, getToken, WEBSOCKET_URL, WEBSOCKET_CONFIG } from "../config"
 import { useUser } from "../contexts/userContext"
 import toast from "react-hot-toast"
 import { 
@@ -71,27 +71,167 @@ interface Application {
     name?: string
   }
 }
-
+interface ConnectedUser{
+  jobId?:string;
+  userId?:string;
+  websocket?:WebSocket;
+  name?:string;
+}
 export const Jobdetails = function () {
   const { jobId } = useParams<{ jobId: string }>()
   const [job, setJob] = useState<Job | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
-  const { user: { userId } } = useUser()
+  const { user: { userId, name: userName } } = useUser()
   const navigate = useNavigate()
 
   // state for apply form
   const [showForm, setShowForm] = useState<boolean>(false)
   const [coverLetter, setCoverLetter] = useState<string>("")
   const [notes, setNotes] = useState<string>("")
-  
+  const [connectedUsers, setConnectedUsers] = useState<ConnectedUser[]>([])
   // state for applications (when user is job owner)
   const [applications, setApplications] = useState<Application[]>([])
   const [applicationsLoading, setApplicationsLoading] = useState<boolean>(false)
   const [userDetails, setUserDetails] = useState<any>(null)
   const [userDetailsLoading, setUserDetailsLoading] = useState<boolean>(false)
-  
+  const [connectionStatus, setConnectionStatus] = useState<'connecting' | 'connected' | 'disconnected' | 'failed'>('connecting')
+  const websocketRef = useRef<WebSocket | null>(null)
+  const retryCountRef = useRef<number>(0)
+  const maxRetriesRef = useRef<number>(WEBSOCKET_CONFIG.maxRetries)
+  const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const isManualCloseRef = useRef<boolean>(false)
   // Check if current user is the job owner
   const isJobOwner = job?.postedby === userId
+
+  const manualRetry = () => {
+
+    retryCountRef.current = 0 // Reset retry count for manual retry
+    setConnectionStatus('connecting')
+    
+    // Clear any existing timeout
+    if (retryTimeoutRef.current) {
+      clearTimeout(retryTimeoutRef.current)
+      retryTimeoutRef.current = null
+    }
+    
+    // Close existing connection if any
+    if (websocketRef.current) {
+      isManualCloseRef.current = true
+      websocketRef.current.close()
+      websocketRef.current = null
+      isManualCloseRef.current = false
+    }
+    
+    // Start new connection
+    connectWebSocket()
+  }
+
+  const connectWebSocket = () => {
+    if (!jobId || !userId) return
+    
+    setConnectionStatus('connecting')
+    
+    try {
+      websocketRef.current = new WebSocket(WEBSOCKET_URL)
+      
+      websocketRef.current.onopen = () => {
+        retryCountRef.current = 0 // Reset retry count on successful connection
+        setConnectionStatus('connected')
+        
+        websocketRef.current?.send(JSON.stringify({
+          event:'getconnectedusers',
+        }))
+      }
+      
+      websocketRef.current.onerror = (error) => {
+        console.error('WebSocket error:', error)
+        setConnectionStatus('failed')
+        if (retryCountRef.current === 0) {
+          toast.error('Failed to connect to server')
+        }
+      }
+      
+      websocketRef.current.onclose = (event) => {
+        
+        // Don't retry if it was a manual close or normal closure
+        if (isManualCloseRef.current || event.code === 1000) {
+          return
+        }
+        
+        // Retry connection with exponential backoff
+        if (retryCountRef.current < maxRetriesRef.current) {
+          retryCountRef.current++
+          setConnectionStatus('connecting')
+          const delay = Math.min(WEBSOCKET_CONFIG.baseDelay * Math.pow(2, retryCountRef.current - 1), WEBSOCKET_CONFIG.maxDelay)
+          
+          toast.error(`Connection lost. Retrying... (${retryCountRef.current}/${maxRetriesRef.current})`)
+          
+          retryTimeoutRef.current = setTimeout(() => {
+            connectWebSocket()
+          }, delay)
+        } else {
+          setConnectionStatus('failed')
+          toast.error('Unable to connect to server. Please refresh the page.')
+        }
+      }
+      
+      websocketRef.current.onmessage = (event) => {
+        const data = JSON.parse(event.data)
+        
+        if(data.event==='connectedusers'){
+          setConnectedUsers(data.connectedUsers)
+        }
+        if(data.event==='joined'){
+          setConnectedUsers([...connectedUsers, {
+            jobId:data.jobId,
+            userId:data.userId,
+            websocket:websocketRef.current,
+            name:data.name,
+          }])
+        }
+        if(data.event==='left'){  
+          setConnectedUsers(connectedUsers.filter(user=>user.websocket!==websocketRef.current))
+        }
+      }
+      
+    } catch (error) {
+      console.error('Error creating WebSocket connection:', error)
+      toast.error('Failed to create WebSocket connection')
+    }
+  }
+  useEffect(() => {
+    if (jobId && userId) {
+      connectWebSocket()
+    }
+    
+    // Cleanup function
+    return () => {
+      isManualCloseRef.current = true
+      
+      // Clear any pending retry timeout
+      if (retryTimeoutRef.current) {
+        clearTimeout(retryTimeoutRef.current)
+        retryTimeoutRef.current = null
+      }
+      
+      // Close WebSocket connection
+      if (websocketRef.current) {
+        try {
+          websocketRef.current.send(JSON.stringify({
+            event:'leave',
+            userId:userId,
+            jobId:jobId,
+          }))
+        } catch (error) {
+          console.error('Error sending leave message:', error)
+        }
+        
+        websocketRef.current.close()
+        websocketRef.current = null
+      }
+    }
+  }, [jobId, userId])
+
   useEffect(() => {
     async function fetchJobDetails() {
       try {
@@ -161,7 +301,6 @@ export const Jobdetails = function () {
             Authorization: getToken(),
           },
         })
-        console.log(response.data)
         setApplications(response.data)
       } catch (err) {
         console.error("Error fetching applications:", err)
@@ -325,6 +464,35 @@ export const Jobdetails = function () {
                     <Building2 className="w-5 h-5" />
                     <span className="font-medium">{job.company?.name}</span>
                   </div>
+                  
+                  {/* Connection Status */}
+                  <div className="flex items-center gap-2 mt-2">
+                    <div className={`w-2 h-2 rounded-full ${
+                      connectionStatus === 'connected' ? 'bg-green-500' :
+                      connectionStatus === 'connecting' ? 'bg-yellow-500 animate-pulse' :
+                      connectionStatus === 'disconnected' ? 'bg-gray-400' :
+                      'bg-red-500'
+                    }`}></div>
+                    <span className={`text-xs font-medium ${
+                      connectionStatus === 'connected' ? 'text-green-600 dark:text-green-400' :
+                      connectionStatus === 'connecting' ? 'text-yellow-600 dark:text-yellow-400' :
+                      connectionStatus === 'disconnected' ? 'text-gray-500 dark:text-gray-400' :
+                      'text-red-600 dark:text-red-400'
+                    }`}>
+                      {connectionStatus === 'connected' ? 'Live Updates' :
+                       connectionStatus === 'connecting' ? 'Connecting...' :
+                       connectionStatus === 'disconnected' ? 'Disconnected' :
+                       'Connection Failed'}
+                    </span>
+                    {(connectionStatus === 'failed' || connectionStatus === 'disconnected') && (
+                      <button
+                        onClick={manualRetry}
+                        className="ml-2 px-2 py-1 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors duration-200"
+                      >
+                        Retry
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 {/* Job Details Grid */}
@@ -414,6 +582,46 @@ export const Jobdetails = function () {
               )}
             </div>
           </div>
+
+              {/* Currently Interviewing */}
+              <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-xl border border-gray-200/60 dark:border-gray-800/60 shadow-lg p-6">
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                  <Users className="w-5 h-5" />
+                  Currently Interviewing ({connectedUsers.length})
+                </h3>
+                
+                {connectedUsers.length === 0 ? (
+                  <div className="text-center py-4">
+                    <Users className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                    <p className="text-gray-500 dark:text-gray-400 text-sm">No one is currently interviewing for this job</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {connectedUsers.map((user, index) => (
+                      <div key={user.userId || index} className="flex items-center gap-3 p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                          {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                            {user.name || 'Anonymous User'}
+                          </p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                            {user.userId === userId ? 'You' : 'Interviewing'}
+                          </p>
+                        </div>
+                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" title="Online"></div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    💡 This shows who else is currently interviewing for this job
+                  </p>
+                </div>
+              </div>
         </div>
 
             {/* Right Column - Sidebar */}

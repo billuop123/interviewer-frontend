@@ -1,4 +1,12 @@
 export const BACKEND_URL=`http://localhost:2000/api/v1`
+export const WEBSOCKET_URL=`ws://localhost:2000`
+export const WEBSOCKET_CONFIG = {
+  maxRetries: 5,
+  baseDelay: 1000, // 1 second
+  maxDelay: 30000, // 30 seconds
+  retryOnClose: true,
+  retryOnError: true
+}
 export function getToken(){
     const token = sessionStorage.getItem("auth_token")
     if (!token) {
