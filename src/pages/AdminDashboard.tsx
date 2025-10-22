@@ -45,8 +45,17 @@ interface Job {
 interface Role { id: string; name: string; code: string }
 interface JobType { id: string; name: string; description?: string }
 interface CompanyType { id: string; name: string; description?: string }
+interface Error { 
+  id: string; 
+  message: string; 
+  description: string; 
+  severity: string; 
+  userId?: string; 
+  created: string; 
+  updated?: string; 
+}
 
-type TabKey = 'overview' | 'companies' | 'users' | 'jobs' | 'roles' | 'jobtypes' | 'companytypes'
+type TabKey = 'overview' | 'companies' | 'users' | 'jobs' | 'roles' | 'jobtypes' | 'companytypes' | 'errors'
 
 export const AdminDashboard = function () {
   const [companies, setCompanies] = useState<Company[]>([])
@@ -64,6 +73,7 @@ export const AdminDashboard = function () {
   const [roles, setRoles] = useState<Role[]>([])
   const [jobTypes, setJobTypes] = useState<JobType[]>([])
   const [companyTypes, setCompanyTypes] = useState<CompanyType[]>([])
+  const [errors, setErrors] = useState<Error[]>([])
   // role editing local state
   const [pendingUserRoles, setPendingUserRoles] = useState<Record<string, string>>({})
 
@@ -89,18 +99,22 @@ export const AdminDashboard = function () {
       fetchJobTypes()
     } else if (activeTab === 'companytypes') {
       fetchCompanyTypes()
+    } else if (activeTab === 'errors') {
+      fetchErrors()
     }
   }, [activeTab])
 
   const fetchDashboardData = async () => {
     try {
       setLoading(true)
-      const [companiesRes, jobsRes] = await Promise.all([
+      const [companiesRes, jobsRes, errorsRes] = await Promise.all([
         axios.get(`${BACKEND_URL}/company`, { headers: { Authorization: getToken() } }),
-        axios.get(`${BACKEND_URL}/job`, { headers: { Authorization: getToken() } })
+        axios.get(`${BACKEND_URL}/job`, { headers: { Authorization: getToken() } }),
+        axios.get(`${BACKEND_URL}/error`, { headers: { Authorization: getToken() } })
       ])
       setCompanies(companiesRes.data)
       setJobs(jobsRes.data)
+      setErrors(errorsRes.data.errors || [])
     } catch (error) {
       console.error("Error fetching dashboard data:", error)
     } finally {
@@ -146,6 +160,15 @@ export const AdminDashboard = function () {
       setCompanyTypes(res.data || [])
     } catch (e) {
       console.error('Error fetching company types:', e)
+    }
+  }
+
+  const fetchErrors = async () => {
+    try {
+      const res = await axios.get(`${BACKEND_URL}/error`, { headers: { Authorization: getToken() } })
+      setErrors(res.data.errors || [])
+    } catch (e) {
+      console.error('Error fetching errors:', e)
     }
   }
 
@@ -267,12 +290,13 @@ export const AdminDashboard = function () {
             { key: 'jobs', label: 'Jobs' },
             { key: 'roles', label: 'Roles' },
             { key: 'jobtypes', label: 'Job Types' },
-            { key: 'companytypes', label: 'Company Types' }
+            { key: 'companytypes', label: 'Company Types' },
+            { key: 'errors', label: 'Errors' }
         ].map(tab => (
           <button
             key={tab.key}
               onClick={() => setActiveTab(tab.key as TabKey)}
-              className={`px-4 py-2 rounded-t-md font-medium transition-colors ${activeTab === tab.key ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'}`}
+              className={`px-4 py-2 rounded-t-md font-medium transition-colors ${activeTab === tab.key ? 'bg-blue-600 text-white dark:bg-blue-500 dark:text-white border-b-2 border-blue-600 dark:border-blue-500' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'}`}
           >
             {tab.label}
           </button>
@@ -282,7 +306,7 @@ export const AdminDashboard = function () {
         {/* Overview */}
       {activeTab === 'overview' && (
           <div className="grid gap-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
               <div className="bg-blue-600 text-white rounded-xl p-6 shadow">
                 <h3 className="text-sm opacity-90">Total Companies</h3>
                 <p className="text-3xl font-bold">{companies.length}</p>
@@ -298,6 +322,10 @@ export const AdminDashboard = function () {
               <div className="bg-amber-400 text-black rounded-xl p-6 shadow">
                 <h3 className="text-sm opacity-90">Active Jobs</h3>
                 <p className="text-3xl font-bold">{jobs.filter(j => j.isactive).length}</p>
+            </div>
+              <div className="bg-red-600 text-white rounded-xl p-6 shadow">
+                <h3 className="text-sm opacity-90">System Errors</h3>
+                <p className="text-3xl font-bold">{errors.length}</p>
             </div>
             </div>
             
@@ -430,7 +458,7 @@ export const AdminDashboard = function () {
                     </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
-                          <button onClick={() => updateUserRole(user.id, (pendingUserRoles[user.id] ?? user.roleId) || '')} className="px-3 py-1 rounded-md text-sm font-medium bg-gray-900 dark:bg-white text-white dark:text-gray-900">Save</button>
+                          <button onClick={() => updateUserRole(user.id, (pendingUserRoles[user.id] ?? user.roleId) || '')} className="px-3 py-1 rounded-md text-sm font-medium bg-blue-600 dark:bg-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-400 transition-colors">Save</button>
                           <button onClick={() => handleDeleteUser(user.id)} className="px-3 py-1 rounded-md text-sm font-medium bg-red-600 hover:bg-red-700 text-white">Delete</button>
                         </div>
                     </td>
@@ -519,7 +547,7 @@ export const AdminDashboard = function () {
               <div className="flex items-center gap-2">
                 <input value={newJobType.name} onChange={(e) => setNewJobType(s => ({ ...s, name: e.target.value }))} placeholder="Name" className="px-3 py-2 rounded-md bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-white" />
                 <input value={newJobType.description} onChange={(e) => setNewJobType(s => ({ ...s, description: e.target.value }))} placeholder="Description" className="px-3 py-2 rounded-md bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-white" />
-                <button onClick={createJobType} className="px-3 py-2 rounded-md bg-gray-900 dark:bg-white text-white dark:text-gray-900">Add</button>
+                <button onClick={createJobType} className="px-3 py-2 rounded-md bg-blue-600 dark:bg-blue-500 text-white font-medium hover:bg-blue-700 dark:hover:bg-blue-400 transition-colors">Add</button>
               </div>
             </div>
             <div className="bg-white/90 dark:bg-gray-900/90 border border-gray-200/60 dark:border-gray-800/60 rounded-xl overflow-hidden">
@@ -555,7 +583,7 @@ export const AdminDashboard = function () {
               <div className="flex items-center gap-2">
                 <input value={newCompanyType.name} onChange={(e) => setNewCompanyType(s => ({ ...s, name: e.target.value }))} placeholder="Name" className="px-3 py-2 rounded-md bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-white" />
                 <input value={newCompanyType.description} onChange={(e) => setNewCompanyType(s => ({ ...s, description: e.target.value }))} placeholder="Description" className="px-3 py-2 rounded-md bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-white" />
-                <button onClick={createCompanyType} className="px-3 py-2 rounded-md bg-gray-900 dark:bg-white text-white dark:text-gray-900">Add</button>
+                <button onClick={createCompanyType} className="px-3 py-2 rounded-md bg-blue-600 dark:bg-blue-500 text-white font-medium hover:bg-blue-700 dark:hover:bg-blue-400 transition-colors">Add</button>
               </div>
             </div>
             <div className="bg-white/90 dark:bg-gray-900/90 border border-gray-200/60 dark:border-gray-800/60 rounded-xl overflow-hidden">
@@ -579,6 +607,69 @@ export const AdminDashboard = function () {
                   ))}
                 </tbody>
               </table>
+            </div>
+          </div>
+        )}
+
+        {/* Errors */}
+        {activeTab === 'errors' && (
+          <div className="grid gap-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">System Errors</h2>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-600 dark:text-gray-400">Total: {errors.length}</span>
+                <button onClick={fetchErrors} className="px-3 py-2 rounded-md bg-blue-600 dark:bg-blue-500 text-white font-medium hover:bg-blue-700 dark:hover:bg-blue-400 transition-colors">Refresh</button>
+              </div>
+            </div>
+            <div className="bg-white/90 dark:bg-gray-900/90 border border-gray-200/60 dark:border-gray-800/60 rounded-xl overflow-hidden">
+              <table className="w-full">
+                <thead className="bg-gray-50 dark:bg-gray-800/50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Severity</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Message</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Description</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">User ID</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Created</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                  {errors.map(error => (
+                    <tr key={error.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/40">
+                      <td className="px-4 py-3">
+                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                          error.severity === 'error' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' :
+                          error.severity === 'warning' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300' :
+                          error.severity === 'info' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' :
+                          'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300'
+                        }`}>
+                          {error.severity.toUpperCase()}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-gray-900 dark:text-white font-medium">{error.message}</td>
+                      <td className="px-4 py-3 text-gray-700 dark:text-gray-300 max-w-xs truncate" title={error.description}>
+                        {error.description}
+                      </td>
+                      <td className="px-4 py-3 text-gray-700 dark:text-gray-300">
+                        {error.userId ? (
+                          <span className="font-mono text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
+                            {error.userId.substring(0, 8)}...
+                          </span>
+                        ) : (
+                          <span className="text-gray-400">N/A</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-gray-700 dark:text-gray-300">
+                        {new Date(error.created).toLocaleString()}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {errors.length === 0 && (
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                  No errors found
+                </div>
+              )}
             </div>
           </div>
         )}

@@ -114,18 +114,13 @@ export const Jobdetails = function () {
     if (!jobId) return
     const bumpViews = async () => {
       try {
-        // Fetch current job to get the latest viewscount
-        const res = await axios.get(`${BACKEND_URL}/job/${jobId}`, {
-          headers: { Authorization: getToken() }
-        })
-        const current = res.data?.viewscount || 0
-        await axios.put(`${BACKEND_URL}/job/${jobId}`, {
-          viewscount: (current || 0) + 1
-        }, {
+        // Use increment operation instead of fetching and updating
+        await axios.put(`${BACKEND_URL}/job/${jobId}/views`, {}, {
           headers: { Authorization: getToken() }
         })
       } catch (e) {
         // ignore view bump errors
+        console.log('View bump failed:', e)
       }
     }
     bumpViews()

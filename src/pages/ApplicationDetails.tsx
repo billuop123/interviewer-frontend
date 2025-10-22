@@ -2,7 +2,7 @@ import axios from "axios"
 import { useState, useEffect } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { BACKEND_URL, getToken } from "../config"
-import { ArrowLeft, User, Mail, Calendar, Video, FileText, Star, MessageSquare, CheckCircle, AlertCircle, Play, Download } from "lucide-react"
+import { ArrowLeft, User, Mail, Calendar, Video, FileText, Star, MessageSquare, CheckCircle, AlertCircle, Play, Download, ExternalLink } from "lucide-react"
 import toast from "react-hot-toast"
 
 interface Application {
@@ -182,6 +182,18 @@ export const ApplicationDetails = function () {
                       <Calendar className="w-4 h-4" />
                       {new Date(application.created).toLocaleDateString()}
                     </p>
+                  </div>
+
+                  {/* View Profile Button */}
+                  <div className="pt-2">
+                    <button
+                      onClick={() => navigate(`/user/${application.user.id}`)}
+                      className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors duration-200"
+                    >
+                      <User className="w-4 h-4" />
+                      View Full Profile
+                      <ExternalLink className="w-4 h-4" />
+                    </button>
                   </div>
                 </div>
               </div>

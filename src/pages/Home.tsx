@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom"
 import { useUser } from "../contexts/userContext"
-import { Briefcase, Building2, Users, Search, ArrowRight, CheckCircle, Zap, Shield, Target } from "lucide-react"
+import { Briefcase, Users, Search, ArrowRight, CheckCircle, Zap, Shield, Target } from "lucide-react"
 
 export const Home = function() {
   const { user } = useUser()
@@ -51,13 +51,6 @@ export const Home = function() {
                     <Search size={20} />
                     Browse All Jobs
                     <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform duration-200" />
-                  </Link>
-                  <Link
-                    to="/company-jobs"
-                    className="group relative inline-flex items-center gap-3 px-8 py-4 border-2 border-black dark:border-white text-black dark:text-white rounded-full font-bold text-lg hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-                  >
-                    <Building2 size={20} />
-                    Company Jobs
                   </Link>
                   <Link
                     to="/dashboard"

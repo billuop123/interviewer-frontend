@@ -153,7 +153,7 @@ export const MyCompanies = function () {
               
               <Link 
                 to="/create-company"
-                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white rounded-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+                className="flex items-center gap-2 px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors duration-200"
               >
                 <Plus className="w-5 h-5" />
                 Create New Company
@@ -173,7 +173,7 @@ export const MyCompanies = function () {
               </p>
               <Link 
                 to="/create-company" 
-                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white rounded-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors duration-200"
               >
                 <Plus className="w-5 h-5" />
                 Create Your First Company
@@ -292,7 +292,7 @@ export const MyCompanies = function () {
                       <div className="flex flex-wrap gap-3">
                         <Link 
                           to={`/company/${company.id}/jobs`}
-                          className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors duration-200"
+                          className="flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors duration-200"
                         >
                           <Eye className="w-4 h-4" />
                           View Jobs
@@ -300,7 +300,7 @@ export const MyCompanies = function () {
                         
                         <Link 
                           to={`/company/${company.id}/post-job`}
-                          className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors duration-200"
+                          className="flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors duration-200"
                         >
                           <Plus className="w-4 h-4" />
                           Post New Job

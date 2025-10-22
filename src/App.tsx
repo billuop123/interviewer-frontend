@@ -26,6 +26,7 @@ const ApplicationDetails = lazy(() => import('./pages/ApplicationDetails').then(
 const EditCompany = lazy(() => import('./pages/EditCompany').then(module => ({ default: module.EditCompany })))
 const ViewJobs = lazy(() => import('./pages/ViewJobs').then(module => ({ default: module.ViewJobs })))
 const Applications = lazy(() => import('./pages/Applications').then(module => ({ default: module.Applications })))
+const User = lazy(() => import('./pages/User').then(module => ({ default: module.User })))
 const NotFound = lazy(() => import('./pages/NotFound').then(module => ({ default: module.NotFound })))
 
 function AppContent() {
@@ -113,6 +114,11 @@ function AppContent() {
           <Route path="/company/:companyId/jobs" element={
             <AuthGuard>
               <ViewJobs/>
+            </AuthGuard>
+          } />
+          <Route path="/user/:userId" element={
+            <AuthGuard>
+              <User/>
             </AuthGuard>
           } />
           
