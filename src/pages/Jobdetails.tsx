@@ -189,6 +189,11 @@ export const Jobdetails = function () {
             name:data.name,
           }])
         }
+        if(data.event==='notify'){
+          if(userId==data.userId){
+            toast.success('Your interview submission was done successfully!You can check yout result and feedback in the appication section in the dashboard page')
+          }
+        }
         if(data.event==='left'){  
           setConnectedUsers(connectedUsers.filter(user=>user.websocket!==websocketRef.current))
         }
