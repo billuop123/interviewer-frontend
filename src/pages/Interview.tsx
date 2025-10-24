@@ -36,7 +36,6 @@ export const Interview = function () {
   const [micEnabled, setMicEnabled] = useState<boolean>(false)
   const [interviewResult, setInterviewResult] = useState<{score: number, reasoning: string} | null>(null)
   const [connectionStatus, setConnectionStatus] = useState<'connecting' | 'connected' | 'disconnected' | 'failed'>('connecting')
-  const [isSubmitted, setIsSubmitted] = useState<boolean>(false)
   
   // Refs
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
@@ -126,7 +125,6 @@ export const Interview = function () {
           setConnectionStatus('failed')
         }
       }
-
       
 
       
@@ -221,7 +219,6 @@ export const Interview = function () {
     
     fetchResume()
   }, [applicationId, user.userId])
-
 
   // Check for existing interview results
   useEffect(() => {
@@ -435,14 +432,9 @@ export const Interview = function () {
   // Enable microphone manually
   const enableMic = () => {
     
-    // Don't allow mic if interview is completed or submitted
+    // Don't allow mic if interview is completed
     if (interviewResult) {
       toast.error("Interview is already completed. Microphone is disabled.")
-      return
-    }
-    
-    if (isSubmitted) {
-      toast.error("Interview has been submitted. Microphone is disabled.")
       return
     }
     
@@ -708,13 +700,37 @@ export const Interview = function () {
 
       const result = await response.json()
       
-      // Mark as submitted and redirect immediately
-      setIsSubmitted(true)
+      // Extract score and reasoning from the response
+      if (result.resume) {
+        try {
+          // The backend returns the AI response in result.resume
+          let jsonText = result.resume.trim()
+          
+          // Remove markdown code blocks if present
+          if (jsonText.startsWith('```json')) {
+            jsonText = jsonText.replace(/^```json\s*/, '').replace(/\s*```$/, '')
+          } else if (jsonText.startsWith('```')) {
+            jsonText = jsonText.replace(/^```\s*/, '').replace(/\s*```$/, '')
+          }
+          
+          const parsedResult = JSON.parse(jsonText)
+          setInterviewResult({
+            score: parsedResult.score,
+            reasoning: parsedResult.reasoning
+          })
+          
+        } catch (parseError) {
+          console.error("Failed to parse interview result:", parseError)
+          setInterviewResult({
+            score: 0,
+            reasoning: "Unable to parse interview results"
+          })
+        }
+      }
+
       toast.dismiss(loadingToastId)
-      toast.success("Interview submitted successfully! Your application is being processed.")
-      
-      // Redirect to jobs page immediately
-      navigate("/jobs")
+      toast.success("Interview submitted successfully!")
+      // Don't navigate immediately - show results first
       
     } catch (error) {
       console.error("Error submitting interview:", error)
@@ -826,9 +842,9 @@ export const Interview = function () {
                     {isPaused ? (
                       <button
                         onClick={resumeInterview}
-                        disabled={!!interviewResult || isSubmitted}
+                        disabled={!!interviewResult}
                         className={`flex items-center gap-2 px-6 py-3 rounded-lg transition-colors duration-200 ${
-                          interviewResult || isSubmitted
+                          interviewResult 
                             ? 'bg-gray-400 cursor-not-allowed' 
                             : 'bg-blue-600 hover:bg-blue-700'
                         } text-white`}
@@ -839,9 +855,9 @@ export const Interview = function () {
                     ) : (
                       <button
                         onClick={pauseInterview}
-                        disabled={!!interviewResult || isSubmitted}
+                        disabled={!!interviewResult}
                         className={`flex items-center gap-2 px-6 py-3 rounded-lg transition-colors duration-200 ${
-                          interviewResult || isSubmitted
+                          interviewResult 
                             ? 'bg-gray-400 cursor-not-allowed' 
                             : 'bg-yellow-600 hover:bg-yellow-700'
                         } text-white`}
@@ -853,15 +869,15 @@ export const Interview = function () {
                     
                     <button
                       onClick={stopInterview}
-                      disabled={!!interviewResult || isSubmitted}
+                      disabled={!!interviewResult}
                       className={`flex items-center gap-2 px-6 py-3 rounded-lg transition-colors duration-200 ${
-                        interviewResult || isSubmitted
+                        interviewResult 
                           ? 'bg-gray-400 cursor-not-allowed' 
                           : 'bg-blue-600 hover:bg-blue-700'
                       } text-white`}
                     >
                       <Upload className="w-5 h-5" />
-                      {interviewResult ? 'Interview Completed' : isSubmitted ? 'Interview Submitted' : 'Complete Interview'}
+                      {interviewResult ? 'Interview Completed' : 'Complete Interview'}
                     </button>
                   </>
                 )}
@@ -875,9 +891,9 @@ export const Interview = function () {
                     {micEnabled ? (
                       <button
                         onClick={disableMic}
-                        disabled={!!interviewResult || isSubmitted}
+                        disabled={!!interviewResult}
                         className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors duration-200 ${
-                          interviewResult || isSubmitted
+                          interviewResult 
                             ? 'bg-gray-400 cursor-not-allowed' 
                             : 'bg-red-600 hover:bg-red-700'
                         } text-white`}
@@ -888,26 +904,24 @@ export const Interview = function () {
                     ) : (
                       <button
                         onClick={enableMic}
-                        disabled={isInterviewerSpeaking || isLoading || !!interviewResult || isSubmitted}
+                        disabled={isInterviewerSpeaking || isLoading || !!interviewResult}
                         className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors duration-200 ${
-                          interviewResult || isSubmitted
+                          interviewResult 
                             ? 'bg-gray-400 cursor-not-allowed' 
                             : 'bg-green-600 hover:bg-green-700'
                         } text-white`}
                       >
                         <Play className="w-4 h-4" />
-                        {interviewResult ? 'Interview Completed' : isSubmitted ? 'Interview Submitted' : 'Enable Mic'}
+                        {interviewResult ? 'Interview Completed' : 'Enable Mic'}
                       </button>
                     )}
                   </div>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
                     {interviewResult 
                       ? "Interview completed - microphone disabled" 
-                      : isSubmitted
-                        ? "Interview submitted - microphone disabled"
-                        : micEnabled 
-                          ? "Microphone is active - you can speak" 
-                          : "Microphone is disabled - click to enable"
+                      : micEnabled 
+                        ? "Microphone is active - you can speak" 
+                        : "Microphone is disabled - click to enable"
                     }
                   </p>
                 </div>
@@ -1044,13 +1058,11 @@ export const Interview = function () {
           <div className="flex items-center gap-2 px-4 py-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200 dark:border-gray-700 rounded-lg">
             <div className={`w-3 h-3 rounded-full ${
               interviewResult ? 'bg-blue-500' :
-              isSubmitted ? 'bg-purple-500' :
               isInterviewerSpeaking ? 'bg-blue-500' : 
               micEnabled ? 'bg-green-500' : 'bg-gray-400'
             }`}></div>
             <span className="text-sm text-gray-700 dark:text-gray-300">
               {interviewResult ? 'Interview Completed' :
-               isSubmitted ? 'Interview Submitted' :
                isInterviewerSpeaking ? 'AI Speaking' : 
                micEnabled ? 'Mic Active' : 'Mic Disabled'}
             </span>

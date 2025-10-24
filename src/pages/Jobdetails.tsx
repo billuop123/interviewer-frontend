@@ -144,7 +144,6 @@ export const Jobdetails = function () {
       }
       
       websocketRef.current.onerror = (error) => {
-        console.error('WebSocket error:', error)
         setConnectionStatus('failed')
         if (retryCountRef.current === 0) {
           toast.error('Failed to connect to server')
@@ -181,21 +180,32 @@ export const Jobdetails = function () {
         if(data.event==='connectedusers'){
           setConnectedUsers(data.connectedUsers)
         }
+        
         if(data.event==='joined'){
-          setConnectedUsers([...connectedUsers, {
-            jobId:data.jobId,
-            userId:data.userId,
-            websocket:websocketRef.current,
-            name:data.name,
-          }])
+          setConnectedUsers(prevUsers => {
+            // Check if user already exists to avoid duplicates
+            const userExists = prevUsers.some(user => user.userId === data.userId)
+            if (userExists) {
+              return prevUsers
+            }
+            return [...prevUsers, {
+              jobId: data.jobId,
+              userId: data.userId,
+              name: data.name,
+            }]
+          })
         }
+        
         if(data.event==='notify'){
-          if(userId==data.userId){
-            toast.success('Your interview submission was done successfully!You can check yout result and feedback in the appication section in the dashboard page')
+          if(userId === data.userId){
+            toast.success('Your interview submission was done successfully! You can check your result and feedback in the application section in the dashboard page')
           }
         }
+        
         if(data.event==='left'){  
-          setConnectedUsers(connectedUsers.filter(user=>user.websocket!==websocketRef.current))
+          setConnectedUsers(prevUsers => 
+            prevUsers.filter(user => user.userId !== data.userId)
+          )
         }
       }
       
@@ -259,19 +269,16 @@ export const Jobdetails = function () {
     if (!jobId) return
     const bumpViews = async () => {
       try {
-        // Use increment operation instead of fetching and updating
         await axios.put(`${BACKEND_URL}/job/${jobId}/views`, {}, {
           headers: { Authorization: getToken() }
         })
       } catch (e) {
-        // ignore view bump errors
         console.log('View bump failed:', e)
       }
     }
     bumpViews()
   }, [jobId])
 
-  // Fetch user details for non-job owners
   useEffect(() => {
     async function fetchUserDetails() {
       if (isJobOwner || !userId) return
