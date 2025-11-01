@@ -1,5 +1,5 @@
-export const BACKEND_URL=`http://localhost:2000/api/v1`
-export const WEBSOCKET_URL=`ws://localhost:2000`
+export const BACKEND_URL=`http://localhost:3000/api/v1`
+export const WEBSOCKET_URL=`ws://localhost:3000`
 export const WEBSOCKET_CONFIG = {
   maxRetries: 5,
   baseDelay: 1000, // 1 second

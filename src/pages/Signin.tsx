@@ -14,7 +14,7 @@ export const Signin = function() {
     const [showPassword, setShowPassword] = useState(false)
     const { setUser } = useUser()
     const navigate = useNavigate()
-
+    
     const handleSignin = async function() {
         if (!email || !password) {
             toast.error("Please fill in all fields")
@@ -57,30 +57,27 @@ export const Signin = function() {
     }
 
     return (
-        <div className="fixed inset-0 w-full h-full bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-black dark:to-gray-800 overflow-hidden">
+        <div className="fixed inset-0 w-full h-full overflow-hidden" style={{background: 'linear-gradient(to bottom right, #0f0f0f, #1a1a1a, #2a2a2a)'}}>
             {/* Enhanced animated background elements */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-gray-200/30 to-gray-400/30 dark:from-gray-700/30 dark:to-gray-500/30 rounded-full blur-3xl animate-pulse"></div>
-                <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-gray-300/25 to-gray-200/25 dark:from-gray-600/25 dark:to-gray-700/25 rounded-full blur-3xl animate-pulse"></div>
-                <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-gray-400/40 dark:bg-gray-500/40 rounded-full"></div>
-                <div className="absolute top-3/4 right-1/4 w-3 h-3 bg-gray-300/50 dark:bg-gray-600/50 rounded-full"></div>
-                <div className="absolute top-1/2 right-1/3 w-1.5 h-1.5 bg-gray-400/30 dark:bg-gray-500/30 rounded-full"></div>
+                <div className="absolute -top-40 -right-40 w-96 h-96 bg-gray-600/10 rounded-full blur-3xl animate-pulse"></div>
+                <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gray-500/10 rounded-full blur-3xl animate-pulse"></div>
             </div>
 
             <div className="relative w-full min-h-full flex items-center justify-center p-4 sm:p-6 lg:p-8">
                 {/* Main card */}
-                <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl border border-gray-200/60 dark:border-gray-800/60 shadow-2xl p-6 sm:p-8 lg:p-12 xl:p-16 space-y-8 lg:space-y-0 relative grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 xl:gap-16 items-center w-full max-w-7xl">
+                <div className="rounded-2xl border shadow-2xl p-6 sm:p-8 lg:p-12 xl:p-16 space-y-8 lg:space-y-0 relative grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 xl:gap-16 items-center w-full max-w-7xl" style={{backgroundColor: '#1a1a1a', borderColor: '#374151'}}>
                     {/* Left Column - Welcome Section */}
                     <div className="flex flex-col justify-center space-y-6 lg:space-y-8 text-center lg:text-left">
                         <div className="space-y-6">
-                            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 rounded-full shadow-lg">
-                                <LogIn className="w-10 h-10 text-gray-700 dark:text-gray-300" />
+                            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full shadow-lg" style={{backgroundColor: '#2a2a2a'}}>
+                                <LogIn className="w-10 h-10" style={{color: '#ea580c'}} />
                             </div>
                             <div className="space-y-4">
-                                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white leading-tight">
+                                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight">
                                     Welcome Back
                                 </h1>
-                                <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-400 leading-relaxed">
+                                <p className="text-lg sm:text-xl text-gray-400 leading-relaxed">
                                     Sign in to your account and continue your journey with us.
                                 </p>
                             </div>
@@ -89,16 +86,16 @@ export const Signin = function() {
                         {/* Features */}
                         <div className="space-y-4">
                             <div className="flex items-center gap-3">
-                                <div className="w-2 h-2 bg-gray-600 dark:bg-gray-400 rounded-full"></div>
-                                <span className="text-gray-700 dark:text-gray-300">Access your dashboard</span>
+                                <div className="w-2 h-2 rounded-full" style={{backgroundColor: '#ea580c'}}></div>
+                                <span className="text-gray-300">Access your dashboard</span>
                             </div>
                             <div className="flex items-center gap-3">
-                                <div className="w-2 h-2 bg-gray-600 dark:bg-gray-400 rounded-full"></div>
-                                <span className="text-gray-700 dark:text-gray-300">Manage your applications</span>
+                                <div className="w-2 h-2 rounded-full" style={{backgroundColor: '#ea580c'}}></div>
+                                <span className="text-gray-300">Manage your applications</span>
                             </div>
                             <div className="flex items-center gap-3">
-                                <div className="w-2 h-2 bg-gray-600 dark:bg-gray-400 rounded-full"></div>
-                                <span className="text-gray-700 dark:text-gray-300">Connect with employers</span>
+                                <div className="w-2 h-2 rounded-full" style={{backgroundColor: '#ea580c'}}></div>
+                                <span className="text-gray-300">Connect with employers</span>
                             </div>
                         </div>
                     </div>
@@ -106,17 +103,17 @@ export const Signin = function() {
                     {/* Right Column - Form Section */}
                     <div className="space-y-6">
                         <div className="text-center lg:text-left space-y-2">
-                            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                            <h2 className="text-2xl font-bold text-white">
                                 Sign In
                             </h2>
-                            <p className="text-gray-600 dark:text-gray-400">
+                            <p className="text-gray-400">
                                 Enter your credentials to access your account
                             </p>
                         </div>
                         
                         {/* Error message */}
                         {error && (
-                            <div className="bg-red-50/80 dark:bg-red-900/30 border border-red-200 dark:border-red-800/50 text-red-700 dark:text-red-300 px-4 py-3 rounded-xl text-sm">
+                            <div className="border text-red-300 px-4 py-3 rounded-xl text-sm" style={{backgroundColor: '#7f1d1d33', borderColor: '#991b1b80'}}>
                                 <div className="flex items-center gap-2">
                                     <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
                                     {error}
@@ -128,7 +125,7 @@ export const Signin = function() {
                         <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleSignin(); }}>
                             {/* Email Input */}
                             <div className="group">
-                                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                                <label className="block text-sm font-semibold text-gray-300 mb-2 flex items-center gap-2">
                                     <Mail className="w-4 h-4" />
                                     Email Address
                                     <span className="text-red-500">*</span>
@@ -142,16 +139,16 @@ export const Signin = function() {
                                         required
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
-                                        className="block w-full px-4 py-3 bg-white/70 dark:bg-gray-800/70 border-2 border-gray-200/60 dark:border-gray-700/60 rounded-xl text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400/20 dark:focus:ring-gray-500/20 focus:border-gray-400 dark:focus:border-gray-500 transition-all duration-300 text-base shadow-sm hover:shadow-md focus:shadow-lg"
+                                        className="block w-full px-4 py-3 border-2 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:border-orange-500 transition-all duration-300 text-base shadow-sm hover:shadow-md focus:shadow-lg" style={{backgroundColor: '#2a2a2a', borderColor: '#4b5563'}}
                                         placeholder="Enter your email address"
                                     />
-                                    <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-transparent via-white/10 to-transparent dark:from-transparent dark:via-gray-800/10 dark:to-transparent opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+                                    <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-transparent via-orange-500/10 to-transparent opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                                 </div>
                             </div>
 
                             {/* Password Input */}
                             <div className="group">
-                                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                                <label className="block text-sm font-semibold text-gray-300 mb-2 flex items-center gap-2">
                                     <Lock className="w-4 h-4" />
                                     Password
                                     <span className="text-red-500">*</span>
@@ -171,11 +168,11 @@ export const Signin = function() {
                                     <button
                                         type="button"
                                         onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors duration-200"
+                                        className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-300 transition-colors duration-200"
                                     >
                                         {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                                     </button>
-                                    <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-transparent via-white/10 to-transparent dark:from-transparent dark:via-gray-800/10 dark:to-transparent opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+                                    <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-transparent via-orange-500/10 to-transparent opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                                 </div>
                             </div>
 
@@ -184,11 +181,13 @@ export const Signin = function() {
                                 <button
                                     type="submit"
                                     disabled={loading}
-                                    className="group w-full flex items-center justify-center gap-3 px-6 py-3 bg-gradient-to-r from-gray-900 to-gray-800 dark:from-white dark:to-gray-100 text-white dark:text-gray-900 rounded-xl font-semibold text-base hover:from-gray-800 hover:to-gray-700 dark:hover:from-gray-100 dark:hover:to-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400/20 dark:focus:ring-gray-500/20 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg hover:shadow-xl disabled:hover:shadow-lg transform hover:scale-105 active:scale-95"
+                                    className="group w-full flex items-center justify-center gap-3 px-6 py-3 text-white rounded-xl font-semibold text-base focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg hover:shadow-xl disabled:hover:shadow-lg transform hover:scale-105 active:scale-95" style={{backgroundColor: '#ea580c', boxShadow: '0 0 0 2px rgba(234, 88, 12, 0.2)'}}
+                                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#dc5500'}
+                                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ea580c'}
                                 >
                                     {loading ? (
                                         <>
-                                            <div className="w-5 h-5 border-2 border-white/30 dark:border-gray-900/30 border-t-white dark:border-t-gray-900 rounded-full animate-spin"></div>
+                                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                                             Signing you in...
                                         </>
                                     ) : (
@@ -201,13 +200,38 @@ export const Signin = function() {
                                 </button>
                             </div>
 
+                            {/* OAuth separator */}
+                            <div className="relative py-3">
+                                <div className="flex items-center gap-3">
+                                    <div className="flex-1 h-px" style={{backgroundColor: '#374151'}}></div>
+                                    <span className="text-xs text-gray-400">or</span>
+                                    <div className="flex-1 h-px" style={{backgroundColor: '#374151'}}></div>
+                                </div>
+                            </div>
+
+                            {/* Google Sign-in */}
+                            <div>
+                                <button
+                                    type="button"
+                                    onClick={() => { window.location.href = `${BACKEND_URL}/auth/google` }}
+                                    className="w-full flex items-center justify-center gap-3 px-6 py-3 rounded-xl font-semibold text-base focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-300 border hover:shadow-md"
+                                    style={{backgroundColor: '#ffffff', color: '#111827', borderColor: '#e5e7eb'}}
+                                >
+                                    <img alt="Google" src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" className="w-5 h-5" />
+                                    Continue with Google
+                                </button>
+                            </div>
+
                             {/* Sign up link */}
-                            <div className="text-center pt-3 border-t border-gray-200/50 dark:border-gray-700/50">
-                                <p className="text-sm text-gray-600 dark:text-gray-400">
+                            <div className="text-center pt-3" style={{borderTopColor: '#374151'}}>
+                                <p className="text-sm text-gray-400">
                                     Don't have an account?{" "}
                                     <Link 
                                         to="/signup" 
-                                        className="font-semibold text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors duration-200 hover:underline underline-offset-4"
+                                        className="font-semibold transition-colors duration-200 hover:underline underline-offset-4"
+                                        style={{color: '#ea580c'}}
+                                        onMouseEnter={(e) => e.currentTarget.style.color = '#dc5500'}
+                                        onMouseLeave={(e) => e.currentTarget.style.color = '#ea580c'}
                                     >
                                         Sign up
                                     </Link>
@@ -218,10 +242,8 @@ export const Signin = function() {
                 </div>
 
                 {/* Enhanced floating elements */}
-                <div className="absolute -top-8 -right-8 w-16 h-16 bg-gradient-to-br from-gray-200/60 to-gray-400/60 dark:from-gray-700/60 dark:to-gray-500/60 rounded-2xl opacity-70 shadow-xl animate-pulse"></div>
-                <div className="absolute -bottom-8 -left-8 w-12 h-12 bg-gradient-to-tr from-gray-300/50 to-gray-200/50 dark:from-gray-600/50 dark:to-gray-700/50 rounded-xl opacity-60 shadow-lg animate-pulse"></div>
-                <div className="absolute top-1/4 -left-4 w-6 h-6 bg-gradient-to-r from-gray-400/40 to-gray-300/40 dark:from-gray-600/40 dark:to-gray-500/40 rounded-full opacity-50 shadow-md animate-pulse"></div>
-                <div className="absolute bottom-1/3 -right-3 w-8 h-8 bg-gradient-to-l from-gray-300/60 to-gray-400/60 dark:from-gray-700/60 dark:to-gray-600/60 rounded-lg opacity-50 shadow-lg animate-pulse"></div>
+                <div className="absolute -top-8 -right-8 w-16 h-16 rounded-2xl opacity-70 shadow-xl animate-pulse" style={{backgroundColor: '#2a2a2a'}}></div>
+                <div className="absolute -bottom-8 -left-8 w-12 h-12 rounded-xl opacity-60 shadow-lg animate-pulse" style={{backgroundColor: '#1a1a1a'}}></div>
             </div>
         </div>
     )

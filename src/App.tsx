@@ -28,6 +28,7 @@ const ViewJobs = lazy(() => import('./pages/ViewJobs').then(module => ({ default
 const Applications = lazy(() => import('./pages/Applications').then(module => ({ default: module.Applications })))
 const User = lazy(() => import('./pages/User').then(module => ({ default: module.User })))
 const NotFound = lazy(() => import('./pages/NotFound').then(module => ({ default: module.NotFound })))
+const OAuthCallback = lazy(() => import('./pages/OAuthCallback').then(module => ({ default: module.OAuthCallback })))
 
 function AppContent() {
   const { user } = useUser()
@@ -40,6 +41,7 @@ function AppContent() {
           <Route path="/" element={<Home />} />
           <Route path="/signin" element={<Signin />} />
           <Route path="/signup" element={<Signup/>} />
+          <Route path="/oauth-callback" element={<OAuthCallback />} />
           
           {/* Protected Routes - Authentication required */}
           <Route path="/jobs" element={

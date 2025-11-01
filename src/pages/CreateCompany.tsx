@@ -96,11 +96,11 @@ export const CreateCompany = function () {
   }
 
   return (
-    <div className="fixed inset-0 w-full h-full bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-black dark:to-gray-800 overflow-auto">
+    <div className="fixed inset-0 w-full h-full overflow-auto" style={{background: 'linear-gradient(to bottom right, #0f0f0f, #1a1a1a, #2a2a2a)'}}>
       {/* Background Animation */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-blue-200/20 to-purple-400/20 dark:from-blue-700/20 dark:to-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-green-300/15 to-blue-200/15 dark:from-green-600/15 dark:to-blue-700/15 rounded-full blur-3xl animate-pulse"></div>
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-gray-600/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gray-500/10 rounded-full blur-3xl animate-pulse"></div>
       </div>
 
       <div className="relative z-10 p-6 lg:p-8 min-h-full">
@@ -109,66 +109,66 @@ export const CreateCompany = function () {
           <div className="mb-8">
             <button
               onClick={() => navigate("/dashboard")}
-              className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors duration-200 mb-6"
+              className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors duration-200 mb-6"
             >
               <ArrowLeft className="w-5 h-5" />
               <span>Back to Dashboard</span>
             </button>
             
             <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
-                <Building2 className="w-8 h-8 text-white" />
+              <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg" style={{backgroundColor: '#2a2a2a'}}>
+                <Building2 className="w-8 h-8" style={{color: '#ea580c'}} />
               </div>
-              <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+              <h1 className="text-3xl lg:text-4xl font-bold text-white mb-4">
                 Create Your Company
               </h1>
-              <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+              <p className="text-lg text-gray-400 max-w-2xl mx-auto">
                 Build your company's presence and start posting jobs to find the best talent for your team.
               </p>
             </div>
           </div>
 
           {/* Benefits Card */}
-          <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-xl border border-gray-200/60 dark:border-gray-800/60 shadow-lg p-6 mb-8">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-              <CheckCircle className="w-5 h-5 text-green-500" />
+          <div className="backdrop-blur-sm rounded-xl border shadow-lg p-6 mb-8" style={{backgroundColor: '#1a1a1a', borderColor: '#374151'}}>
+            <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+              <CheckCircle className="w-5 h-5" style={{color: '#22c55e'}} />
               Why create a company?
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="flex items-start gap-3">
-                <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
-                  <Building2 className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-1" style={{backgroundColor: '#ea580c20'}}>
+                  <Building2 className="w-4 h-4" style={{color: '#ea580c'}} />
                 </div>
                 <div>
-                  <p className="font-medium text-gray-900 dark:text-white">Post Job Listings</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Create and manage job postings for your organization</p>
+                  <p className="font-medium text-white">Post Job Listings</p>
+                  <p className="text-sm text-gray-400">Create and manage job postings for your organization</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
-                  <CheckCircle className="w-4 h-4 text-green-600 dark:text-green-400" />
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-1" style={{backgroundColor: '#16a34a20'}}>
+                  <CheckCircle className="w-4 h-4" style={{color: '#22c55e'}} />
                 </div>
                 <div>
-                  <p className="font-medium text-gray-900 dark:text-white">Manage Applications</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Review and track candidate applications</p>
+                  <p className="font-medium text-white">Manage Applications</p>
+                  <p className="text-sm text-gray-400">Review and track candidate applications</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
-                  <Hash className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-1" style={{backgroundColor: '#3b82f620'}}>
+                  <Hash className="w-4 h-4" style={{color: '#60a5fa'}} />
                 </div>
                 <div>
-                  <p className="font-medium text-gray-900 dark:text-white">Track Performance</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Monitor job performance and analytics</p>
+                  <p className="font-medium text-white">Track Performance</p>
+                  <p className="text-sm text-gray-400">Monitor job performance and analytics</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <div className="w-8 h-8 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
-                  <Globe className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-1" style={{backgroundColor: '#ea580c20'}}>
+                  <Globe className="w-4 h-4" style={{color: '#ea580c'}} />
                 </div>
                 <div>
-                  <p className="font-medium text-gray-900 dark:text-white">Build Presence</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Establish your company's brand on the platform</p>
+                  <p className="font-medium text-white">Build Presence</p>
+                  <p className="text-sm text-gray-400">Establish your company's brand on the platform</p>
                 </div>
               </div>
             </div>
@@ -176,14 +176,14 @@ export const CreateCompany = function () {
 
           {/* Error Messages */}
           {errors.length > 0 && (
-            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/60 rounded-xl p-4 mb-8">
+            <div className="border rounded-xl p-4 mb-8" style={{backgroundColor: '#7f1d1d33', borderColor: '#991b1b80'}}>
               <div className="flex items-start gap-3">
-                <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" style={{color: '#f87171'}} />
                 <div>
-                  <h4 className="font-semibold text-red-800 dark:text-red-300 mb-2">Please fix the following errors:</h4>
+                  <h4 className="font-semibold text-red-300 mb-2">Please fix the following errors:</h4>
                   <ul className="space-y-1">
                     {errors.map((error, index) => (
-                      <li key={index} className="text-sm text-red-700 dark:text-red-400">• {error}</li>
+                      <li key={index} className="text-sm text-red-400">• {error}</li>
                     ))}
                   </ul>
                 </div>
@@ -192,11 +192,11 @@ export const CreateCompany = function () {
           )}
 
           {/* Form */}
-          <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-xl border border-gray-200/60 dark:border-gray-800/60 shadow-lg p-8">
+          <div className="backdrop-blur-sm rounded-xl border shadow-lg p-8" style={{backgroundColor: '#1a1a1a', borderColor: '#374151'}}>
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Company Name */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-semibold text-gray-300 mb-2">
                   Company Name *
                 </label>
                 <input
@@ -205,25 +205,27 @@ export const CreateCompany = function () {
                   value={formData.name}
                   onChange={handleInputChange}
                   placeholder="Enter your company name"
-                  className="w-full px-4 py-3 bg-white/70 dark:bg-gray-800/70 border-2 border-gray-200/60 dark:border-gray-700/60 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400/20 dark:focus:ring-blue-500/20 focus:border-blue-400 dark:focus:border-blue-500 transition-all duration-300"
+                  className="w-full px-4 py-3 border-2 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 transition-all duration-300 text-base shadow-sm hover:shadow-md focus:shadow-lg"
+                  style={{backgroundColor: '#2a2a2a', borderColor: '#4b5563'}}
                   required
                 />
               </div>
 
               {/* Email */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-semibold text-gray-300 mb-2">
                   Email Address *
                 </label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                   <input
                     type="email"
                     name="email"
                     value={formData.email}
                     onChange={handleInputChange}
                     placeholder="company@example.com"
-                    className="w-full pl-12 pr-4 py-3 bg-white/70 dark:bg-gray-800/70 border-2 border-gray-200/60 dark:border-gray-700/60 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400/20 dark:focus:ring-blue-500/20 focus:border-blue-400 dark:focus:border-blue-500 transition-all duration-300"
+                    className="w-full pl-12 pr-4 py-3 border-2 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 transition-all duration-300 text-base shadow-sm hover:shadow-md focus:shadow-lg"
+                    style={{backgroundColor: '#2a2a2a', borderColor: '#4b5563'}}
                     required
                   />
                 </div>
@@ -231,45 +233,48 @@ export const CreateCompany = function () {
 
               {/* Website */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-semibold text-gray-300 mb-2">
                   Website URL
                 </label>
                 <div className="relative">
-                  <Globe className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
+                  <Globe className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                   <input
                     type="url"
                     name="website"
                     value={formData.website}
                     onChange={handleInputChange}
                     placeholder="https://www.yourcompany.com"
-                    className="w-full pl-12 pr-4 py-3 bg-white/70 dark:bg-gray-800/70 border-2 border-gray-200/60 dark:border-gray-700/60 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400/20 dark:focus:ring-blue-500/20 focus:border-blue-400 dark:focus:border-blue-500 transition-all duration-300"
+                    className="w-full pl-12 pr-4 py-3 border-2 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 transition-all duration-300 text-base shadow-sm hover:shadow-md focus:shadow-lg"
+                    style={{backgroundColor: '#2a2a2a', borderColor: '#4b5563'}}
                   />
                 </div>
               </div>
 
               {/* Logo */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-semibold text-gray-300 mb-2">
                   Logo URL
                 </label>
                 <div className="relative">
-                  <Image className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
+                  <Image className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                   <input
                     type="url"
                     name="logo"
                     value={formData.logo}
                     onChange={handleInputChange}
                     placeholder="https://example.com/logo.png"
-                    className="w-full pl-12 pr-4 py-3 bg-white/70 dark:bg-gray-800/70 border-2 border-gray-200/60 dark:border-gray-700/60 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400/20 dark:focus:ring-blue-500/20 focus:border-blue-400 dark:focus:border-blue-500 transition-all duration-300"
+                    className="w-full pl-12 pr-4 py-3 border-2 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 transition-all duration-300 text-base shadow-sm hover:shadow-md focus:shadow-lg"
+                    style={{backgroundColor: '#2a2a2a', borderColor: '#4b5563'}}
                   />
                 </div>
                 {formData.logo && (
-                  <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Logo Preview:</p>
+                  <div className="mt-4 p-4 rounded-lg" style={{backgroundColor: '#2a2a2a'}}>
+                    <p className="text-sm text-gray-400 mb-2">Logo Preview:</p>
                     <img 
                       src={formData.logo} 
                       alt="Logo preview"
-                      className="max-w-24 max-h-24 border border-gray-200 dark:border-gray-700 rounded-lg"
+                      className="max-w-24 max-h-24 border rounded-lg"
+                      style={{borderColor: '#4b5563'}}
                       onError={(e) => {
                         e.currentTarget.style.display = "none"
                       }}
@@ -284,7 +289,10 @@ export const CreateCompany = function () {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:from-gray-400 disabled:to-gray-500 text-white rounded-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:transform-none disabled:cursor-not-allowed"
+                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3 text-white rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:transform-none disabled:cursor-not-allowed"
+                  style={{backgroundColor: '#ea580c', boxShadow: '0 0 0 2px rgba(234, 88, 12, 0.2)'}}
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#dc5500')}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#ea580c')}
                 >
                   {loading ? (
                     <>
@@ -302,7 +310,10 @@ export const CreateCompany = function () {
                 <button
                   type="button"
                   onClick={() => navigate("/dashboard")}
-                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gray-500 hover:bg-gray-600 text-white rounded-lg font-semibold transition-colors duration-200"
+                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3 text-white rounded-xl font-semibold transition-colors duration-200"
+                  style={{backgroundColor: '#374151'}}
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#4b5563')}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#374151')}
                 >
                   <ArrowLeft className="w-5 h-5" />
                   Cancel

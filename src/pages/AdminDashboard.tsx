@@ -1,7 +1,15 @@
 import axios from "axios"
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useState } from "react"
 import { BACKEND_URL, getToken } from "../config"
 import { Link } from "react-router-dom"
+import toast from "react-hot-toast"
+import { Modal } from "../components/Modal"
+import { Tabs } from "../components/Tabs"
+import { OverviewTab } from "../components/admin/OverviewTab"
+import { CompaniesTab } from "../components/admin/CompaniesTab"
+import { UsersTab } from "../components/admin/UsersTab"
+import { JobsTab } from "../components/admin/JobsTab"
+import { RolesTab } from "../components/admin/RolesTab"
 
 interface Company {
   id: string
@@ -80,6 +88,20 @@ export const AdminDashboard = function () {
   // create forms state
   const [newJobType, setNewJobType] = useState<{ name: string; description: string }>({ name: '', description: '' })
   const [newCompanyType, setNewCompanyType] = useState<{ name: string; description: string }>({ name: '', description: '' })
+
+  // modal state
+  const [modalState, setModalState] = useState<{
+    isOpen: boolean
+    title: string
+    message: string
+    type: 'danger' | 'warning' | 'info' | 'success'
+    onConfirm?: () => void
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'info'
+  })
 
   useEffect(() => {
     fetchDashboardData()
@@ -174,95 +196,161 @@ export const AdminDashboard = function () {
 
   const updateUserRole = async (userId: string, roleId: string) => {
     try {
-      await axios.put(`${BACKEND_URL}/user/${userId}`, { roleId }, { headers: { Authorization: getToken() } })
+      await axios.put(`${BACKEND_URL}/users/${userId}`, { roleId }, { headers: { Authorization: getToken() } })
       await fetchUsers(usersPage)
+      toast.success('User role updated successfully')
     } catch (e) {
       console.error('Error updating user role:', e)
+      toast.error('Failed to update user role')
     }
   }
 
   const createJobType = async () => {
-    if (!newJobType.name.trim() || !newJobType.description.trim()) return
+    if (!newJobType.name.trim() || !newJobType.description.trim()) {
+      toast.error('Please fill in both name and description')
+      return
+    }
     try {
       await axios.post(`${BACKEND_URL}/jobtype`, newJobType, { headers: { Authorization: getToken() } })
       setNewJobType({ name: '', description: '' })
       fetchJobTypes()
+      toast.success('Job type created successfully')
     } catch (e) {
       console.error('Error creating job type:', e)
+      toast.error('Failed to create job type')
     }
   }
 
   const deleteJobType = async (jobtypeid: string) => {
-    if (!confirm('Delete this job type?')) return
-    try {
-      await axios.delete(`${BACKEND_URL}/jobstype/${jobtypeid}`, { headers: { Authorization: getToken() } })
-      fetchJobTypes()
-    } catch (e) {
-      console.error('Error deleting job type:', e)
-    }
+    setModalState({
+      isOpen: true,
+      title: 'Delete Job Type',
+      message: 'Are you sure you want to delete this job type? This action cannot be undone.',
+      type: 'danger',
+      onConfirm: async () => {
+        try {
+          await axios.delete(`${BACKEND_URL}/jobtype/${jobtypeid}`, { headers: { Authorization: getToken() } })
+          fetchJobTypes()
+          toast.success('Job type deleted successfully')
+          setModalState({ ...modalState, isOpen: false })
+        } catch (e) {
+          console.error('Error deleting job type:', e)
+          toast.error('Failed to delete job type')
+          setModalState({ ...modalState, isOpen: false })
+        }
+      }
+    })
   }
 
   const createCompanyType = async () => {
-    if (!newCompanyType.name.trim() || !newCompanyType.description.trim()) return
+    if (!newCompanyType.name.trim() || !newCompanyType.description.trim()) {
+      toast.error('Please fill in both name and description')
+      return
+    }
     try {
       await axios.post(`${BACKEND_URL}/companytype`, newCompanyType, { headers: { Authorization: getToken() } })
       setNewCompanyType({ name: '', description: '' })
       fetchCompanyTypes()
+      toast.success('Company type created successfully')
     } catch (e) {
       console.error('Error creating company type:', e)
+      toast.error('Failed to create company type')
     }
   }
 
   const deleteCompanyType = async (companyTypeId: string) => {
-    if (!confirm('Delete this company type?')) return
-    try {
-      await axios.delete(`${BACKEND_URL}/companytype/${companyTypeId}`, { headers: { Authorization: getToken() } })
-      fetchCompanyTypes()
-    } catch (e) {
-      console.error('Error deleting company type:', e)
-    }
+    setModalState({
+      isOpen: true,
+      title: 'Delete Company Type',
+      message: 'Are you sure you want to delete this company type? This action cannot be undone.',
+      type: 'danger',
+      onConfirm: async () => {
+        try {
+          await axios.delete(`${BACKEND_URL}/companytype/${companyTypeId}`, { headers: { Authorization: getToken() } })
+          fetchCompanyTypes()
+          toast.success('Company type deleted successfully')
+          setModalState({ ...modalState, isOpen: false })
+        } catch (e) {
+          console.error('Error deleting company type:', e)
+          toast.error('Failed to delete company type')
+          setModalState({ ...modalState, isOpen: false })
+        }
+      }
+    })
   }
 
   const handleBlacklistCompany = async (companyId: string, blacklist: boolean) => {
     try {
       await axios.put(`${BACKEND_URL}/company/${companyId}`, { blacklisted: blacklist }, { headers: { Authorization: getToken() } })
       fetchDashboardData()
+      toast.success(blacklist ? 'Company blacklisted' : 'Company unblacklisted')
     } catch (error) {
       console.error("Error updating company:", error)
+      toast.error('Failed to update company')
     }
   }
 
   const handleDeleteCompany = async (companyId: string) => {
-    if (window.confirm("Are you sure you want to delete this company?")) {
-      try {
-        await axios.delete(`${BACKEND_URL}/company/${companyId}`, { headers: { Authorization: getToken() } })
-        fetchDashboardData()
-      } catch (error) {
-        console.error("Error deleting company:", error)
+    setModalState({
+      isOpen: true,
+      title: 'Delete Company',
+      message: 'Are you sure you want to delete this company? This will also delete all associated jobs and cannot be undone.',
+      type: 'danger',
+      onConfirm: async () => {
+        try {
+          await axios.delete(`${BACKEND_URL}/company/${companyId}`, { headers: { Authorization: getToken() } })
+          fetchDashboardData()
+          toast.success('Company deleted successfully')
+          setModalState({ ...modalState, isOpen: false })
+        } catch (error) {
+          console.error("Error deleting company:", error)
+          toast.error('Failed to delete company')
+          setModalState({ ...modalState, isOpen: false })
+        }
       }
-    }
+    })
   }
 
   const handleDeleteUser = async (userId: string) => {
-    if (window.confirm("Are you sure you want to delete this user?")) {
-      try {
-        await axios.delete(`${BACKEND_URL}/user/${userId}`, { headers: { Authorization: getToken() } })
-        fetchUsers(usersPage)
-      } catch (error) {
-        console.error("Error deleting user:", error)
+    setModalState({
+      isOpen: true,
+      title: 'Delete User',
+      message: 'Are you sure you want to delete this user? This action cannot be undone.',
+      type: 'danger',
+      onConfirm: async () => {
+        try {
+          await axios.delete(`${BACKEND_URL}/users/${userId}`, { headers: { Authorization: getToken() } })
+          fetchUsers(usersPage)
+          toast.success('User deleted successfully')
+          setModalState({ ...modalState, isOpen: false })
+        } catch (error) {
+          console.error("Error deleting user:", error)
+          toast.error('Failed to delete user')
+          setModalState({ ...modalState, isOpen: false })
+        }
       }
-    }
+    })
   }
 
   const handleDeleteJob = async (jobId: string) => {
-    if (window.confirm("Are you sure you want to delete this job?")) {
-      try {
-        await axios.delete(`${BACKEND_URL}/job/${jobId}`, { headers: { Authorization: getToken() } })
-        fetchDashboardData()
-      } catch (error) {
-        console.error("Error deleting job:", error)
+    setModalState({
+      isOpen: true,
+      title: 'Delete Job',
+      message: 'Are you sure you want to delete this job? This action cannot be undone.',
+      type: 'danger',
+      onConfirm: async () => {
+        try {
+          await axios.delete(`${BACKEND_URL}/job/${jobId}`, { headers: { Authorization: getToken() } })
+          fetchDashboardData()
+          toast.success('Job deleted successfully')
+          setModalState({ ...modalState, isOpen: false })
+        } catch (error) {
+          console.error("Error deleting job:", error)
+          toast.error('Failed to delete job')
+          setModalState({ ...modalState, isOpen: false })
+        }
       }
-    }
+    })
   }
 
   if (loading) {
@@ -282,261 +370,57 @@ export const AdminDashboard = function () {
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">Admin Dashboard</h1>
 
         {/* Tabs */}
-        <div className="flex flex-wrap gap-2 border-b border-gray-200 dark:border-gray-800 mb-6">
-        {[
-          { key: 'overview', label: 'Overview' },
-          { key: 'companies', label: 'Companies' },
-          { key: 'users', label: 'Users' },
+        <Tabs
+          tabs={[
+            { key: 'overview', label: 'Overview' },
+            { key: 'companies', label: 'Companies' },
+            { key: 'users', label: 'Users' },
             { key: 'jobs', label: 'Jobs' },
             { key: 'roles', label: 'Roles' },
             { key: 'jobtypes', label: 'Job Types' },
             { key: 'companytypes', label: 'Company Types' },
             { key: 'errors', label: 'Errors' }
-        ].map(tab => (
-          <button
-            key={tab.key}
-              onClick={() => setActiveTab(tab.key as TabKey)}
-              className={`px-4 py-2 rounded-t-md font-medium transition-colors ${activeTab === tab.key ? 'bg-blue-600 text-white dark:bg-blue-500 dark:text-white border-b-2 border-blue-600 dark:border-blue-500' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'}`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
+          ]}
+          activeTab={activeTab}
+          onTabChange={(key) => setActiveTab(key as TabKey)}
+        />
 
         {/* Overview */}
       {activeTab === 'overview' && (
-          <div className="grid gap-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-              <div className="bg-blue-600 text-white rounded-xl p-6 shadow">
-                <h3 className="text-sm opacity-90">Total Companies</h3>
-                <p className="text-3xl font-bold">{companies.length}</p>
-              </div>
-              <div className="bg-green-600 text-white rounded-xl p-6 shadow">
-                <h3 className="text-sm opacity-90">Total Users</h3>
-                <p className="text-3xl font-bold">{users.length}</p>
-              </div>
-              <div className="bg-cyan-600 text-white rounded-xl p-6 shadow">
-                <h3 className="text-sm opacity-90">Total Jobs</h3>
-                <p className="text-3xl font-bold">{jobs.length}</p>
-            </div>
-              <div className="bg-amber-400 text-black rounded-xl p-6 shadow">
-                <h3 className="text-sm opacity-90">Active Jobs</h3>
-                <p className="text-3xl font-bold">{jobs.filter(j => j.isactive).length}</p>
-            </div>
-              <div className="bg-red-600 text-white rounded-xl p-6 shadow">
-                <h3 className="text-sm opacity-90">System Errors</h3>
-                <p className="text-3xl font-bold">{errors.length}</p>
-            </div>
-            </div>
-            
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-white/90 dark:bg-gray-900/90 border border-gray-200/60 dark:border-gray-800/60 rounded-xl p-6">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Recent Companies</h3>
-                <div className="divide-y divide-gray-200 dark:divide-gray-800">
-                  {companies.slice(0,5).map(c => (
-                    <div key={c.id} className="py-3 flex items-center justify-between">
-                      <span className="font-medium text-gray-900 dark:text-white">{c.name}</span>
-                      <span className="text-xs text-gray-500 dark:text-gray-400">{new Date(c.created).toLocaleDateString()}</span>
-            </div>
-                  ))}
-                </div>
-              </div>
-              <div className="bg-white/90 dark:bg-gray-900/90 border border-gray-200/60 dark:border-gray-800/60 rounded-xl p-6">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Recent Jobs</h3>
-                <div className="divide-y divide-gray-200 dark:divide-gray-800">
-                  {jobs.slice(0,5).map(j => (
-                    <div key={j.id} className="py-3 flex items-center justify-between">
-                      <span className="font-medium text-gray-900 dark:text-white">{j.title}</span>
-                      <span className="text-xs text-gray-500 dark:text-gray-400">{j.company.name}</span>
-                </div>
-              ))}
-                </div>
-              </div>
-          </div>
-        </div>
+          <OverviewTab companies={companies} users={users} jobs={jobs} errors={errors} />
       )}
 
         {/* Companies */}
       {activeTab === 'companies' && (
-          <div className="grid gap-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Companies Management</h2>
-              <Link to="/create-company" className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md font-medium">Create Company</Link>
-          </div>
-            <div className="bg-white/90 dark:bg-gray-900/90 border border-gray-200/60 dark:border-gray-800/60 rounded-xl overflow-hidden">
-              <table className="w-full">
-                <thead className="bg-gray-50 dark:bg-gray-800/50">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Name</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Email</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Website</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Post Limit</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Status</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Actions</th>
-                </tr>
-              </thead>
-                <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                {companies.map(company => (
-                    <tr key={company.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/40">
-                      <td className="px-4 py-3 text-gray-900 dark:text-white">
-                        <div className="flex items-center gap-2">
-                      {company.logo && (
-                            <img src={company.logo} alt={company.name} className="w-6 h-6 rounded" />
-                      )}
-                      {company.name}
-                        </div>
-                    </td>
-                      <td className="px-4 py-3 text-gray-700 dark:text-gray-300">{company.email}</td>
-                      <td className="px-4 py-3 text-blue-600 dark:text-blue-400">
-                        {company.website ? <a href={company.website} target="_blank" rel="noreferrer">{company.website}</a> : 'N/A'}
-                    </td>
-                      <td className="px-4 py-3 text-gray-700 dark:text-gray-300">{company.postlimit}</td>
-                      <td className="px-4 py-3">
-                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${company.blacklisted ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'}`}>
-                          {company.blacklisted ? 'Blacklisted' : 'Active'}
-                      </span>
-                    </td>
-                      <td className="px-4 py-3">
-                        <div className="flex gap-2">
-                          <button onClick={() => handleBlacklistCompany(company.id, !company.blacklisted)} className={`px-3 py-1 rounded-md text-sm font-medium ${company.blacklisted ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-amber-400 hover:bg-amber-500 text-black'}`}>
-                            {company.blacklisted ? 'Unblacklist' : 'Blacklist'}
-                        </button>
-                          <button onClick={() => handleDeleteCompany(company.id)} className="px-3 py-1 rounded-md text-sm font-medium bg-red-600 hover:bg-red-700 text-white">Delete</button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+          <CompaniesTab 
+            companies={companies} 
+            onBlacklist={handleBlacklistCompany}
+            onDelete={handleDeleteCompany}
+          />
       )}
 
         {/* Users */}
       {activeTab === 'users' && (
-          <div className="grid gap-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Users Management</h2>
-              <div className="flex items-center gap-2">
-                <button disabled={usersPage === 1} onClick={() => setUsersPage(p => Math.max(1, p - 1))} className="px-3 py-1 rounded-md bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-gray-200 disabled:opacity-50">Prev</button>
-                <span className="text-gray-700 dark:text-gray-300">Page {usersPage}</span>
-                <button onClick={() => setUsersPage(p => p + 1)} className="px-3 py-1 rounded-md bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-gray-200">Next</button>
-              </div>
-            </div>
-            <div className="bg-white/90 dark:bg-gray-900/90 border border-gray-200/60 dark:border-gray-800/60 rounded-xl overflow-hidden">
-              <table className="w-full">
-                <thead className="bg-gray-50 dark:bg-gray-800/50">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Name</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Email</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Phone</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Company</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Joined</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Role</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Actions</th>
-                </tr>
-              </thead>
-                <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                {users.map(user => (
-                    <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/40">
-                      <td className="px-4 py-3 text-gray-900 dark:text-white">{user.name}</td>
-                      <td className="px-4 py-3 text-gray-700 dark:text-gray-300">{user.email}</td>
-                      <td className="px-4 py-3 text-gray-700 dark:text-gray-300">{user.phone || 'N/A'}</td>
-                      <td className="px-4 py-3 text-gray-700 dark:text-gray-300">{user.companyId ? 'Associated' : 'Independent'}</td>
-                      <td className="px-4 py-3 text-gray-700 dark:text-gray-300">{new Date(user.created).toLocaleDateString()}</td>
-                      <td className="px-4 py-3">
-                        <select
-                          value={pendingUserRoles[user.id] ?? user.roleId ?? ''}
-                          onChange={(e) => setPendingUserRoles(s => ({ ...s, [user.id]: e.target.value }))}
-                          className="px-2 py-1 rounded-md bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-white"
-                        >
-                          <option value="">Select role</option>
-                          {roles.map(r => (
-                            <option key={r.id} value={r.id}>{r.name}</option>
-                          ))}
-                        </select>
-                    </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <button onClick={() => updateUserRole(user.id, (pendingUserRoles[user.id] ?? user.roleId) || '')} className="px-3 py-1 rounded-md text-sm font-medium bg-blue-600 dark:bg-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-400 transition-colors">Save</button>
-                          <button onClick={() => handleDeleteUser(user.id)} className="px-3 py-1 rounded-md text-sm font-medium bg-red-600 hover:bg-red-700 text-white">Delete</button>
-                        </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+          <UsersTab
+            users={users}
+            roles={roles}
+            page={usersPage}
+            onPageChange={setUsersPage}
+            onRoleUpdate={updateUserRole}
+            onDelete={handleDeleteUser}
+            pendingRoles={pendingUserRoles}
+            onPendingRoleChange={(userId, roleId) => setPendingUserRoles(s => ({ ...s, [userId]: roleId }))}
+          />
       )}
 
         {/* Jobs */}
       {activeTab === 'jobs' && (
-          <div className="grid gap-4">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Jobs Management</h2>
-            <div className="bg-white/90 dark:bg-gray-900/90 border border-gray-200/60 dark:border-gray-800/60 rounded-xl overflow-hidden">
-              <table className="w-full">
-                <thead className="bg-gray-50 dark:bg-gray-800/50">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Title</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Company</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Views</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Applications</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Status</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Actions</th>
-                </tr>
-              </thead>
-                <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                {jobs.map(job => (
-                    <tr key={job.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/40">
-                      <td className="px-4 py-3">
-                        <Link to={`/job/${job.id}`} className="text-blue-600 dark:text-blue-400 hover:underline">{job.title}</Link>
-                    </td>
-                      <td className="px-4 py-3 text-gray-700 dark:text-gray-300">{job.company.name}</td>
-                      <td className="px-4 py-3 text-gray-700 dark:text-gray-300">{job.viewscount}</td>
-                      <td className="px-4 py-3 text-gray-700 dark:text-gray-300">{job.applicationscount}</td>
-                      <td className="px-4 py-3">
-                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${job.isactive ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'}`}>
-                          {job.isactive ? 'Active' : 'Inactive'}
-                        </span>
-                        {job.isfeatured && (
-                          <span className="ml-2 px-2 py-1 rounded-full text-xs font-semibold bg-amber-400 text-black">Featured</span>
-                      )}
-                    </td>
-                      <td className="px-4 py-3">
-                        <button onClick={() => handleDeleteJob(job.id)} className="px-3 py-1 rounded-md text-sm font-medium bg-red-600 hover:bg-red-700 text-white">Delete</button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+          <JobsTab jobs={jobs} onDelete={handleDeleteJob} />
       )}
 
         {/* Roles */}
         {activeTab === 'roles' && (
-          <div className="grid gap-4">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Roles</h2>
-            <div className="bg-white/90 dark:bg-gray-900/90 border border-gray-200/60 dark:border-gray-800/60 rounded-xl overflow-hidden">
-              <table className="w-full">
-                <thead className="bg-gray-50 dark:bg-gray-800/50">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Name</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-300">Code</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                  {roles.map(r => (
-                    <tr key={r.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/40">
-                      <td className="px-4 py-3 text-gray-900 dark:text-white">{r.name}</td>
-                      <td className="px-4 py-3 text-gray-700 dark:text-gray-300">{r.code}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <RolesTab roles={roles} />
         )}
 
         {/* Job Types */}
@@ -673,6 +557,18 @@ export const AdminDashboard = function () {
             </div>
           </div>
         )}
+
+        {/* Modal Component */}
+        <Modal
+          isOpen={modalState.isOpen}
+          onClose={() => setModalState({ ...modalState, isOpen: false })}
+          title={modalState.title}
+          message={modalState.message}
+          type={modalState.type}
+          onConfirm={modalState.onConfirm}
+          confirmText="Delete"
+          cancelText="Cancel"
+        />
       </div>
     </div>
   )

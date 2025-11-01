@@ -265,21 +265,21 @@ export const UserDetails = function () {
 
   if (loading) {
     return (
-      <div className="fixed inset-0 w-full h-full bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-black dark:to-gray-800 flex items-center justify-center">
+      <div className="fixed inset-0 w-full h-full flex items-center justify-center" style={{background: 'linear-gradient(to bottom right, #0f0f0f, #1a1a1a, #2a2a2a)'}}>
         <div className="flex flex-col items-center space-y-4">
-          <div className="w-12 h-12 border-4 border-gray-300 dark:border-gray-600 border-t-gray-600 dark:border-t-gray-300 rounded-full animate-spin"></div>
-          <p className="text-gray-600 dark:text-gray-400 text-lg">Loading your profile...</p>
+          <div className="w-12 h-12 border-4 border-gray-600 border-t-orange-500 rounded-full animate-spin"></div>
+          <p className="text-gray-400 text-lg">Loading your profile...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="fixed inset-0 w-full h-full bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-black dark:to-gray-800 overflow-auto">
+    <div className="fixed inset-0 w-full h-full overflow-auto" style={{background: 'linear-gradient(to bottom right, #0f0f0f, #1a1a1a, #2a2a2a)'}}>
       {/* Background Animation */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-blue-200/20 to-purple-400/20 dark:from-blue-700/20 dark:to-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-green-300/15 to-blue-200/15 dark:from-green-600/15 dark:to-blue-700/15 rounded-full blur-3xl animate-pulse"></div>
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-gray-600/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gray-500/10 rounded-full blur-3xl animate-pulse"></div>
       </div>
 
       <div className="relative z-10 p-6 lg:p-8 min-h-full">
@@ -288,61 +288,61 @@ export const UserDetails = function () {
           <div className="mb-8">
             <button
               onClick={() => navigate('/dashboard')}
-              className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors duration-200 mb-6"
+              className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors duration-200 mb-6"
             >
               <ArrowLeft className="w-5 h-5" />
               <span>Back to Dashboard</span>
             </button>
             
             <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
-                <User className="w-8 h-8 text-white" />
+              <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg" style={{backgroundColor: '#2a2a2a'}}>
+                <User className="w-8 h-8" style={{color: '#ea580c'}} />
               </div>
-              <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+              <h1 className="text-3xl lg:text-4xl font-bold text-white mb-4">
                 Profile Details
               </h1>
-              <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+              <p className="text-lg text-gray-400 max-w-2xl mx-auto">
                 Complete your profile to make your applications more competitive and help employers find you.
               </p>
             </div>
           </div>
 
           {/* Benefits Card */}
-          <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-xl border border-gray-200/60 dark:border-gray-800/60 shadow-lg p-6 mb-8">
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-              <Star className="w-5 h-5 text-yellow-500" />
+          <div className="backdrop-blur-sm rounded-xl border shadow-lg p-6 mb-8" style={{backgroundColor: '#1a1a1a', borderColor: '#374151'}}>
+            <h3 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
+              <Star className="w-5 h-5" style={{color: '#eab308'}} />
               Why complete your profile?
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="flex items-start gap-3">
-                <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                <p className="text-gray-600 dark:text-gray-400">Help employers find you with relevant skills and experience</p>
+                <CheckCircle className="w-5 h-5 mt-0.5 flex-shrink-0" style={{color: '#22c55e'}} />
+                <p className="text-gray-400">Help employers find you with relevant skills and experience</p>
               </div>
               <div className="flex items-start gap-3">
-                <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                <p className="text-gray-600 dark:text-gray-400">Showcase your portfolio and professional links</p>
+                <CheckCircle className="w-5 h-5 mt-0.5 flex-shrink-0" style={{color: '#22c55e'}} />
+                <p className="text-gray-400">Showcase your portfolio and professional links</p>
               </div>
               <div className="flex items-start gap-3">
-                <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                <p className="text-gray-600 dark:text-gray-400">Set salary expectations for better job matches</p>
+                <CheckCircle className="w-5 h-5 mt-0.5 flex-shrink-0" style={{color: '#22c55e'}} />
+                <p className="text-gray-400">Set salary expectations for better job matches</p>
               </div>
               <div className="flex items-start gap-3">
-                <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                <p className="text-gray-600 dark:text-gray-400">Make your applications more competitive</p>
+                <CheckCircle className="w-5 h-5 mt-0.5 flex-shrink-0" style={{color: '#22c55e'}} />
+                <p className="text-gray-400">Make your applications more competitive</p>
               </div>
             </div>
           </div>
 
           {/* Error Messages */}
           {errors.length > 0 && (
-            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4 mb-6">
+            <div className="border rounded-xl p-4 mb-6" style={{backgroundColor: '#7f1d1d33', borderColor: '#991b1b80'}}>
               <div className="flex items-start gap-3">
-                <AlertCircle className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
+                <AlertCircle className="w-5 h-5 mt-0.5 flex-shrink-0" style={{color: '#f87171'}} />
                 <div>
-                  <h4 className="font-semibold text-red-800 dark:text-red-300 mb-2">Please fix the following errors:</h4>
+                  <h4 className="font-semibold text-red-300 mb-2">Please fix the following errors:</h4>
                   <ul className="list-disc list-inside space-y-1">
                     {errors.map((error, index) => (
-                      <li key={index} className="text-red-700 dark:text-red-400">{error}</li>
+                      <li key={index} className="text-red-400">{error}</li>
                     ))}
                   </ul>
                 </div>
@@ -353,15 +353,15 @@ export const UserDetails = function () {
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-8">
             {/* Personal Information */}
-            <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-xl border border-gray-200/60 dark:border-gray-800/60 shadow-lg p-6">
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+            <div className="backdrop-blur-sm rounded-xl border shadow-lg p-6" style={{backgroundColor: '#1a1a1a', borderColor: '#374151'}}>
+              <h3 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
                 <User className="w-5 h-5" />
                 Personal Information
               </h3>
               
               <div className="space-y-6">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-semibold text-gray-300 mb-2">
                     Bio *
                   </label>
                   <textarea
@@ -370,14 +370,15 @@ export const UserDetails = function () {
                     onChange={handleInputChange}
                     rows={4}
                     placeholder="Tell us about yourself, your career goals, and what makes you unique..."
-                    className="w-full px-4 py-3 bg-white/70 dark:bg-gray-800/70 border-2 border-gray-200/60 dark:border-gray-700/60 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400/20 dark:focus:ring-blue-500/20 focus:border-blue-400 dark:focus:border-blue-500 transition-all duration-300 resize-vertical"
+                    className="w-full px-4 py-3 border-2 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 transition-all duration-300 resize-vertical"
+                    style={{backgroundColor: '#2a2a2a', borderColor: '#4b5563'}}
                     required
                   />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-semibold text-gray-300 mb-2">
                       Phone Number
                     </label>
                     <div className="relative">
@@ -388,13 +389,14 @@ export const UserDetails = function () {
                         value={formData.phone}
                         onChange={handleInputChange}
                         placeholder="+1 (555) 123-4567"
-                        className="w-full pl-10 pr-4 py-3 bg-white/70 dark:bg-gray-800/70 border-2 border-gray-200/60 dark:border-gray-700/60 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400/20 dark:focus:ring-blue-500/20 focus:border-blue-400 dark:focus:border-blue-500 transition-all duration-300"
+                        className="w-full pl-10 pr-4 py-3 border-2 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 transition-all duration-300"
+                        style={{backgroundColor: '#2a2a2a', borderColor: '#4b5563'}}
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-semibold text-gray-300 mb-2">
                       Location *
                     </label>
                     <div className="relative">
@@ -405,7 +407,8 @@ export const UserDetails = function () {
                         value={formData.location}
                         onChange={handleInputChange}
                         placeholder="City, State/Country"
-                        className="w-full pl-10 pr-4 py-3 bg-white/70 dark:bg-gray-800/70 border-2 border-gray-200/60 dark:border-gray-700/60 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400/20 dark:focus:ring-blue-500/20 focus:border-blue-400 dark:focus:border-blue-500 transition-all duration-300"
+                        className="w-full pl-10 pr-4 py-3 border-2 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 transition-all duration-300"
+                        style={{backgroundColor: '#2a2a2a', borderColor: '#4b5563'}}
                         required
                       />
                     </div>
@@ -414,7 +417,7 @@ export const UserDetails = function () {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-semibold text-gray-300 mb-2">
                       Years of Experience *
                     </label>
                     <div className="relative">
@@ -427,14 +430,15 @@ export const UserDetails = function () {
                         min="0"
                         max="50"
                         placeholder="5"
-                        className="w-full pl-10 pr-4 py-3 bg-white/70 dark:bg-gray-800/70 border-2 border-gray-200/60 dark:border-gray-700/60 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400/20 dark:focus:ring-blue-500/20 focus:border-blue-400 dark:focus:border-blue-500 transition-all duration-300"
+                        className="w-full pl-10 pr-4 py-3 border-2 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 transition-all duration-300"
+                        style={{backgroundColor: '#2a2a2a', borderColor: '#4b5563'}}
                         required
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-semibold text-gray-300 mb-2">
                       Expected Salary (USD)
                     </label>
                     <div className="relative">
@@ -447,7 +451,8 @@ export const UserDetails = function () {
                         min="0"
                         max="1000000"
                         placeholder="75000"
-                        className="w-full pl-10 pr-4 py-3 bg-white/70 dark:bg-gray-800/70 border-2 border-gray-200/60 dark:border-gray-700/60 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400/20 dark:focus:ring-blue-500/20 focus:border-blue-400 dark:focus:border-blue-500 transition-all duration-300"
+                        className="w-full pl-10 pr-4 py-3 border-2 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 transition-all duration-300"
+                        style={{backgroundColor: '#2a2a2a', borderColor: '#4b5563'}}
                       />
                     </div>
                   </div>
@@ -456,8 +461,8 @@ export const UserDetails = function () {
             </div>
 
             {/* Professional Links */}
-            <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-xl border border-gray-200/60 dark:border-gray-800/60 shadow-lg p-6">
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+            <div className="backdrop-blur-sm rounded-xl border shadow-lg p-6" style={{backgroundColor: '#1a1a1a', borderColor: '#374151'}}>
+              <h3 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
                 <Globe className="w-5 h-5" />
                 Professional Links
               </h3>
@@ -476,36 +481,37 @@ export const UserDetails = function () {
                         className="hidden"
                         id="resume-upload"
                       />
-                      <label
+                    <label
                         htmlFor="resume-upload"
-                        className="flex items-center justify-center gap-3 w-full px-4 py-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer transition-all duration-300 hover:border-blue-400 dark:hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-900/20"
+                        className="flex items-center justify-center gap-3 w-full px-4 py-3 border-2 border-dashed rounded-lg cursor-pointer transition-all duration-300"
+                        style={{borderColor: '#4b5563', backgroundColor: '#2a2a2a'}}
                       >
                         <FileText className="w-5 h-5 text-gray-400" />
-                        <span className="text-gray-600 dark:text-gray-400">
+                        <span className="text-gray-400">
                           {resumeFile ? `${resumeFile.name} - Ready to upload` : 'Click to upload PDF resume'}
                         </span>
                       </label>
                     </div>
                     
                     {formData.resumelink && !resumeFile && (
-                      <div className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-                        <CheckCircle className="w-5 h-5 text-green-500" />
-                        <span className="text-green-700 dark:text-green-400 text-sm">
+                      <div className="flex items-center gap-2 p-3 rounded-lg" style={{backgroundColor: '#22c55e33', border: '1px solid #14532d'}}>
+                        <CheckCircle className="w-5 h-5" style={{color: '#22c55e'}} />
+                        <span className="text-sm" style={{color: '#22c55e'}}>
                           Resume already uploaded
                         </span>
                       </div>
                     )}
                     
                     {resumeFile && (
-                      <div className="flex items-center gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                        <FileText className="w-5 h-5 text-blue-500" />
-                        <span className="text-blue-700 dark:text-blue-400 text-sm">
+                      <div className="flex items-center gap-2 p-3 rounded-lg" style={{backgroundColor: '#3b82f633', border: '1px solid #1e3a8a'}}>
+                        <FileText className="w-5 h-5" style={{color: '#60a5fa'}} />
+                        <span className="text-sm" style={{color: '#60a5fa'}}>
                           Resume will be uploaded when you save your profile
                         </span>
                       </div>
                     )}
                     
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                    <p className="text-xs text-gray-400">
                       Upload a PDF file (max 10MB)
                     </p>
                   </div>
@@ -513,7 +519,7 @@ export const UserDetails = function () {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-semibold text-gray-300 mb-2">
                       LinkedIn Profile
                     </label>
                     <div className="relative">
@@ -524,13 +530,14 @@ export const UserDetails = function () {
                         value={formData.linkedin}
                         onChange={handleInputChange}
                         placeholder="https://linkedin.com/in/yourprofile"
-                        className="w-full pl-10 pr-4 py-3 bg-white/70 dark:bg-gray-800/70 border-2 border-gray-200/60 dark:border-gray-700/60 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400/20 dark:focus:ring-blue-500/20 focus:border-blue-400 dark:focus:border-blue-500 transition-all duration-300"
+                        className="w-full pl-10 pr-4 py-3 border-2 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 transition-all duration-300"
+                        style={{backgroundColor: '#2a2a2a', borderColor: '#4b5563'}}
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-semibold text-gray-300 mb-2">
                       GitHub Profile
                     </label>
                     <div className="relative">
@@ -541,14 +548,15 @@ export const UserDetails = function () {
                         value={formData.github}
                         onChange={handleInputChange}
                         placeholder="https://github.com/yourusername"
-                        className="w-full pl-10 pr-4 py-3 bg-white/70 dark:bg-gray-800/70 border-2 border-gray-200/60 dark:border-gray-700/60 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400/20 dark:focus:ring-blue-500/20 focus:border-blue-400 dark:focus:border-blue-500 transition-all duration-300"
+                        className="w-full pl-10 pr-4 py-3 border-2 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 transition-all duration-300"
+                        style={{backgroundColor: '#2a2a2a', borderColor: '#4b5563'}}
                       />
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-semibold text-gray-300 mb-2">
                     Portfolio Website
                   </label>
                   <div className="relative">
@@ -559,7 +567,8 @@ export const UserDetails = function () {
                       value={formData.portfolio}
                       onChange={handleInputChange}
                       placeholder="https://yourportfolio.com"
-                      className="w-full pl-10 pr-4 py-3 bg-white/70 dark:bg-gray-800/70 border-2 border-gray-200/60 dark:border-gray-700/60 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400/20 dark:focus:ring-blue-500/20 focus:border-blue-400 dark:focus:border-blue-500 transition-all duration-300"
+                      className="w-full pl-10 pr-4 py-3 border-2 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 transition-all duration-300"
+                      style={{backgroundColor: '#2a2a2a', borderColor: '#4b5563'}}
                     />
                   </div>
                 </div>
@@ -567,8 +576,8 @@ export const UserDetails = function () {
             </div>
 
             {/* Skills */}
-            <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-xl border border-gray-200/60 dark:border-gray-800/60 shadow-lg p-6">
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+            <div className="backdrop-blur-sm rounded-xl border shadow-lg p-6" style={{backgroundColor: '#1a1a1a', borderColor: '#374151'}}>
+              <h3 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
                 <Star className="w-5 h-5" />
                 Skills *
               </h3>
@@ -580,7 +589,8 @@ export const UserDetails = function () {
                     value={skillInput}
                     onChange={(e) => setSkillInput(e.target.value)}
                     placeholder="Add a skill (e.g., JavaScript, React, Python)"
-                    className="flex-1 px-4 py-3 bg-white/70 dark:bg-gray-800/70 border-2 border-gray-200/60 dark:border-gray-700/60 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400/20 dark:focus:ring-blue-500/20 focus:border-blue-400 dark:focus:border-blue-500 transition-all duration-300"
+                    className="flex-1 px-4 py-3 border-2 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 transition-all duration-300"
+                    style={{backgroundColor: '#2a2a2a', borderColor: '#4b5563'}}
                     onKeyPress={(e) => {
                       if (e.key === 'Enter') {
                         e.preventDefault()
@@ -591,7 +601,10 @@ export const UserDetails = function () {
                   <button
                     type="button"
                     onClick={addSkill}
-                    className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-all duration-300 flex items-center gap-2"
+                    className="px-6 py-3 text-white rounded-xl font-semibold transition-all duration-300 flex items-center gap-2"
+                    style={{backgroundColor: '#ea580c'}}
+                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#dc5500')}
+                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#ea580c')}
                   >
                     <Plus className="w-4 h-4" />
                     Add
@@ -600,12 +613,13 @@ export const UserDetails = function () {
 
                 <div className="flex flex-wrap gap-3">
                   {formData.skills.map((skill, index) => (
-                    <span key={index} className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded-full text-sm font-medium border border-blue-200 dark:border-blue-800">
+                    <span key={index} className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium border" style={{backgroundColor: '#ea580c20', color: '#ea580c', borderColor: '#ea580c40'}}>
                       {skill}
                       <button
                         type="button"
                         onClick={() => removeSkill(skill)}
-                        className="hover:bg-blue-200 dark:hover:bg-blue-800 rounded-full p-0.5 transition-colors"
+                        className="rounded-full p-0.5 transition-colors"
+                        style={{backgroundColor: 'transparent'}}
                       >
                         <X className="w-3 h-3" />
                       </button>
@@ -614,27 +628,28 @@ export const UserDetails = function () {
                 </div>
                 
                 {formData.skills.length === 0 && (
-                  <p className="text-gray-500 dark:text-gray-400 text-sm">Add at least one skill to complete your profile</p>
+                  <p className="text-gray-400 text-sm">Add at least one skill to complete your profile</p>
                 )}
               </div>
             </div>
 
             {/* Availability */}
-            <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-xl border border-gray-200/60 dark:border-gray-800/60 shadow-lg p-6">
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+            <div className="backdrop-blur-sm rounded-xl border shadow-lg p-6" style={{backgroundColor: '#1a1a1a', borderColor: '#374151'}}>
+              <h3 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
                 <Calendar className="w-5 h-5" />
                 Availability
               </h3>
               
               <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-semibold text-gray-300 mb-2">
                   Availability Status
                 </label>
                 <select
                   name="availability"
                   value={formData.availability}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-white/70 dark:bg-gray-800/70 border-2 border-gray-200/60 dark:border-gray-700/60 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400/20 dark:focus:ring-blue-500/20 focus:border-blue-400 dark:focus:border-blue-500 transition-all duration-300"
+                  className="w-full px-4 py-3 border-2 rounded-xl text-white focus:outline-none focus:ring-2 transition-all duration-300"
+                  style={{backgroundColor: '#2a2a2a', borderColor: '#4b5563'}}
                 >
                   <option value="">Select availability</option>
                   <option value="Available immediately">Available immediately</option>
@@ -651,7 +666,10 @@ export const UserDetails = function () {
               <button
                 type="submit"
                 disabled={saving}
-                className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 disabled:from-gray-400 disabled:to-gray-500 text-white rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:transform-none disabled:cursor-not-allowed"
+                className="flex-1 flex items-center justify-center gap-2 px-6 py-4 text-white rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:transform-none disabled:cursor-not-allowed"
+                style={{backgroundColor: '#ea580c'}}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#dc5500')}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#ea580c')}
               >
                 {saving ? (
                   <>
@@ -669,7 +687,10 @@ export const UserDetails = function () {
               <button
                 type="button"
                 onClick={() => navigate("/dashboard")}
-                className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-gray-600 hover:bg-gray-700 text-white rounded-xl font-semibold transition-all duration-300"
+                className="flex-1 flex items-center justify-center gap-2 px-6 py-4 text-white rounded-xl font-semibold transition-all duration-300"
+                style={{backgroundColor: '#374151'}}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#4b5563')}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#374151')}
               >
                 <ArrowLeft className="w-5 h-5" />
                 Back to Dashboard

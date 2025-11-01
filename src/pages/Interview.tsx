@@ -740,11 +740,11 @@ export const Interview = function () {
   }
 
   return (
-    <div className="fixed inset-0 w-full h-full bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-black dark:to-gray-800 overflow-auto">
+    <div className="fixed inset-0 w-full h-full overflow-auto" style={{background: 'linear-gradient(to bottom right, #0f0f0f, #1a1a1a, #2a2a2a)'}}>
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-blue-200/20 to-purple-400/20 dark:from-blue-700/20 dark:to-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-gradient-to-tl from-green-200/20 to-blue-400/20 dark:from-green-700/20 dark:to-blue-500/20 rounded-full blur-3xl animate-pulse delay-1000 duration-1000"></div>
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-gray-600/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gray-500/10 rounded-full blur-3xl animate-pulse"></div>
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -752,15 +752,18 @@ export const Interview = function () {
         <div className="flex items-center justify-between mb-8">
           <button
             onClick={() => navigate("/jobs")}
-            className="flex items-center gap-2 px-4 py-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-white dark:hover:bg-gray-800 transition-colors duration-200"
+            className="flex items-center gap-2 px-4 py-2 border rounded-lg transition-colors duration-200"
+            style={{backgroundColor: '#1a1a1a', borderColor: '#374151', color: 'white'}}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2a2a2a'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#1a1a1a'}
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Jobs
           </button>
           
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">AI Interview</h1>
-            <p className="text-gray-600 dark:text-gray-400">Job ID: {jobId}</p>
+            <h1 className="text-2xl font-bold text-white">AI Interview</h1>
+            <p className="text-gray-400">Job ID: {jobId}</p>
             
             {/* Connection Status */}
             <div className="flex items-center justify-center gap-2 mt-2">
@@ -771,10 +774,10 @@ export const Interview = function () {
                 'bg-red-500'
               }`}></div>
               <span className={`text-xs font-medium ${
-                connectionStatus === 'connected' ? 'text-green-600 dark:text-green-400' :
-                connectionStatus === 'connecting' ? 'text-yellow-600 dark:text-yellow-400' :
-                connectionStatus === 'disconnected' ? 'text-gray-500 dark:text-gray-400' :
-                'text-red-600 dark:text-red-400'
+                connectionStatus === 'connected' ? 'text-green-400' :
+                connectionStatus === 'connecting' ? 'text-yellow-400' :
+                connectionStatus === 'disconnected' ? 'text-gray-400' :
+                'text-red-400'
               }`}>
                 {connectionStatus === 'connected' ? 'Connected' :
                  connectionStatus === 'connecting' ? 'Connecting...' :
@@ -784,7 +787,10 @@ export const Interview = function () {
               {(connectionStatus === 'failed' || connectionStatus === 'disconnected') && (
                 <button
                   onClick={manualRetry}
-                  className="ml-2 px-2 py-1 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors duration-200"
+                  className="ml-2 px-2 py-1 text-xs text-white rounded transition-colors duration-200"
+                  style={{backgroundColor: '#ea580c'}}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#dc5500'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ea580c'}
                 >
                   Retry
                 </button>
@@ -798,8 +804,8 @@ export const Interview = function () {
         <div className="grid lg:grid-cols-2 gap-8">
           {/* Video Section */}
           <div className="space-y-6">
-            <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-xl border border-gray-200/60 dark:border-gray-800/60 shadow-lg p-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Video Preview</h3>
+            <div className="backdrop-blur-sm rounded-xl border shadow-lg p-6" style={{backgroundColor: '#1a1a1a', borderColor: '#374151'}}>
+              <h3 className="text-lg font-semibold text-white mb-4">Video Preview</h3>
               
               {videoUrl ? (
                 <video
@@ -810,29 +816,33 @@ export const Interview = function () {
                   }}
                   autoPlay
                   muted
-                  className="w-full h-64 bg-gray-100 dark:bg-gray-800 rounded-lg object-cover"
+                  className="w-full h-64 rounded-lg object-cover"
+                  style={{backgroundColor: '#2a2a2a'}}
                 />
               ) : (
-                <div className="w-full h-64 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+                <div className="w-full h-64 rounded-lg flex items-center justify-center" style={{backgroundColor: '#2a2a2a'}}>
                   <div className="text-center">
-                    <div className="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{backgroundColor: '#374151'}}>
                       <Play className="w-8 h-8 text-gray-400" />
                     </div>
-                    <p className="text-gray-500 dark:text-gray-400">Start interview to see video</p>
+                    <p className="text-gray-400">Start interview to see video</p>
                   </div>
                 </div>
               )}
             </div>
 
             {/* Interview Controls */}
-            <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-xl border border-gray-200/60 dark:border-gray-800/60 shadow-lg p-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Interview Controls</h3>
+            <div className="backdrop-blur-sm rounded-xl border shadow-lg p-6" style={{backgroundColor: '#1a1a1a', borderColor: '#374151'}}>
+              <h3 className="text-lg font-semibold text-white mb-4">Interview Controls</h3>
               
               <div className="flex flex-wrap gap-3">
                 {!interviewStarted ? (
                   <button
                     onClick={startInterview}
-                    className="flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors duration-200"
+                    className="flex items-center gap-2 px-6 py-3 text-white rounded-xl transition-colors duration-200"
+                    style={{backgroundColor: '#22c55e'}}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#16a34a'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#22c55e'}
                   >
                     <Play className="w-5 h-5" />
                     Start Interview
@@ -843,11 +853,10 @@ export const Interview = function () {
                       <button
                         onClick={resumeInterview}
                         disabled={!!interviewResult}
-                        className={`flex items-center gap-2 px-6 py-3 rounded-lg transition-colors duration-200 ${
-                          interviewResult 
-                            ? 'bg-gray-400 cursor-not-allowed' 
-                            : 'bg-blue-600 hover:bg-blue-700'
-                        } text-white`}
+                        className="flex items-center gap-2 px-6 py-3 rounded-xl transition-colors duration-200 text-white"
+                        style={{backgroundColor: interviewResult ? '#4b5563' : '#ea580c'}}
+                        onMouseEnter={(e) => !interviewResult && (e.currentTarget.style.backgroundColor = '#dc5500')}
+                        onMouseLeave={(e) => !interviewResult && (e.currentTarget.style.backgroundColor = '#ea580c')}
                       >
                         <Play className="w-5 h-5" />
                         Resume
@@ -856,11 +865,10 @@ export const Interview = function () {
                       <button
                         onClick={pauseInterview}
                         disabled={!!interviewResult}
-                        className={`flex items-center gap-2 px-6 py-3 rounded-lg transition-colors duration-200 ${
-                          interviewResult 
-                            ? 'bg-gray-400 cursor-not-allowed' 
-                            : 'bg-yellow-600 hover:bg-yellow-700'
-                        } text-white`}
+                        className="flex items-center gap-2 px-6 py-3 rounded-xl transition-colors duration-200 text-white"
+                        style={{backgroundColor: interviewResult ? '#4b5563' : '#eab308'}}
+                        onMouseEnter={(e) => !interviewResult && (e.currentTarget.style.backgroundColor = '#ca8a04')}
+                        onMouseLeave={(e) => !interviewResult && (e.currentTarget.style.backgroundColor = '#eab308')}
                       >
                         <Pause className="w-5 h-5" />
                         Pause
@@ -870,11 +878,10 @@ export const Interview = function () {
                     <button
                       onClick={stopInterview}
                       disabled={!!interviewResult}
-                      className={`flex items-center gap-2 px-6 py-3 rounded-lg transition-colors duration-200 ${
-                        interviewResult 
-                          ? 'bg-gray-400 cursor-not-allowed' 
-                          : 'bg-blue-600 hover:bg-blue-700'
-                      } text-white`}
+                      className="flex items-center gap-2 px-6 py-3 rounded-xl transition-colors duration-200 text-white"
+                      style={{backgroundColor: interviewResult ? '#4b5563' : '#ea580c'}}
+                      onMouseEnter={(e) => !interviewResult && (e.currentTarget.style.backgroundColor = '#dc5500')}
+                      onMouseLeave={(e) => !interviewResult && (e.currentTarget.style.backgroundColor = '#ea580c')}
                     >
                       <Upload className="w-5 h-5" />
                       {interviewResult ? 'Interview Completed' : 'Complete Interview'}
@@ -885,18 +892,17 @@ export const Interview = function () {
               
               {/* Microphone Controls */}
               {interviewStarted && (
-                <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                  <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-3">Microphone Control</h4>
+                <div className="mt-4 pt-4" style={{borderTop: '1px solid', borderColor: '#374151'}}>
+                  <h4 className="text-sm font-medium text-white mb-3">Microphone Control</h4>
                   <div className="flex gap-3">
                     {micEnabled ? (
                       <button
                         onClick={disableMic}
                         disabled={!!interviewResult}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors duration-200 ${
-                          interviewResult 
-                            ? 'bg-gray-400 cursor-not-allowed' 
-                            : 'bg-red-600 hover:bg-red-700'
-                        } text-white`}
+                        className="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors duration-200 text-white"
+                        style={{backgroundColor: interviewResult ? '#4b5563' : '#ef4444'}}
+                        onMouseEnter={(e) => !interviewResult && (e.currentTarget.style.backgroundColor = '#dc2626')}
+                        onMouseLeave={(e) => !interviewResult && (e.currentTarget.style.backgroundColor = '#ef4444')}
                       >
                         <Square className="w-4 h-4" />
                         Disable Mic
@@ -905,18 +911,17 @@ export const Interview = function () {
                       <button
                         onClick={enableMic}
                         disabled={isInterviewerSpeaking || isLoading || !!interviewResult}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors duration-200 ${
-                          interviewResult 
-                            ? 'bg-gray-400 cursor-not-allowed' 
-                            : 'bg-green-600 hover:bg-green-700'
-                        } text-white`}
+                        className="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors duration-200 text-white"
+                        style={{backgroundColor: interviewResult ? '#4b5563' : '#22c55e'}}
+                        onMouseEnter={(e) => !interviewResult && (e.currentTarget.style.backgroundColor = '#16a34a')}
+                        onMouseLeave={(e) => !interviewResult && (e.currentTarget.style.backgroundColor = '#22c55e')}
                       >
                         <Play className="w-4 h-4" />
                         {interviewResult ? 'Interview Completed' : 'Enable Mic'}
                       </button>
                     )}
                   </div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                  <p className="text-xs text-gray-400 mt-2">
                     {interviewResult 
                       ? "Interview completed - microphone disabled" 
                       : micEnabled 
@@ -932,17 +937,17 @@ export const Interview = function () {
           {/* Chat Section */}
           <div className="space-y-6">
             {/* Live Transcript */}
-            <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-xl border border-gray-200/60 dark:border-gray-800/60 shadow-lg p-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            <div className="backdrop-blur-sm rounded-xl border shadow-lg p-6" style={{backgroundColor: '#1a1a1a', borderColor: '#374151'}}>
+              <h3 className="text-lg font-semibold text-white mb-4">
                 Live Transcript
                 {isLoading && <Loader2 className="w-4 h-4 animate-spin ml-2" />}
               </h3>
               
-              <div className="min-h-[100px] p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <div className="min-h-[100px] p-4 rounded-lg" style={{backgroundColor: '#2a2a2a'}}>
                 {transcript ? (
-                  <p className="text-gray-900 dark:text-white">{transcript}</p>
+                  <p className="text-white">{transcript}</p>
                 ) : (
-                  <p className="text-gray-500 dark:text-gray-400 italic">
+                  <p className="text-gray-400 italic">
                     {isInterviewerSpeaking ? "AI is speaking..." : "Start speaking..."}
                   </p>
                 )}
@@ -950,12 +955,12 @@ export const Interview = function () {
             </div>
 
             {/* Message History */}
-            <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-xl border border-gray-200/60 dark:border-gray-800/60 shadow-lg p-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Conversation</h3>
+            <div className="backdrop-blur-sm rounded-xl border shadow-lg p-6" style={{backgroundColor: '#1a1a1a', borderColor: '#374151'}}>
+              <h3 className="text-lg font-semibold text-white mb-4">Conversation</h3>
               
               <div className="space-y-4 max-h-64 overflow-y-auto">
                 {(messages || []).length === 0 ? (
-                  <p className="text-gray-500 dark:text-gray-400 italic text-center py-8">
+                  <p className="text-gray-400 italic text-center py-8">
                     No messages yet. Start the interview to begin.
                   </p>
                 ) : (
@@ -964,11 +969,14 @@ export const Interview = function () {
                       key={index}
                       className={`p-3 rounded-lg ${
                         message.role === "user"
-                          ? "bg-blue-100 dark:bg-blue-900/30 ml-8"
-                          : "bg-gray-100 dark:bg-gray-800 mr-8"
+                          ? "ml-8"
+                          : "mr-8"
                       }`}
+                      style={{
+                        backgroundColor: message.role === "user" ? '#ea580c33' : '#2a2a2a'
+                      }}
                     >
-                      <p className="text-sm text-gray-900 dark:text-white">
+                      <p className="text-sm text-white">
                         {message.content}
                       </p>
                     </div>
@@ -981,23 +989,23 @@ export const Interview = function () {
 
         {/* Interview Results */}
         {interviewResult && (
-          <div className="mt-8 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-xl border border-gray-200/60 dark:border-gray-800/60 shadow-lg p-6">
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">Interview Results</h3>
+          <div className="mt-8 backdrop-blur-sm rounded-xl border shadow-lg p-6" style={{backgroundColor: '#1a1a1a', borderColor: '#374151'}}>
+            <h3 className="text-xl font-semibold text-white mb-6">Interview Results</h3>
             
             <div className="grid md:grid-cols-2 gap-6">
               {/* Score Section */}
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-lg p-6">
-                <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-3">Overall Score</h4>
+              <div className="rounded-lg p-6" style={{backgroundColor: '#2a2a2a'}}>
+                <h4 className="text-lg font-medium text-white mb-3">Overall Score</h4>
                 <div className="flex items-center gap-4">
                   <div className={`text-4xl font-bold ${
-                    interviewResult.score >= 8 ? 'text-green-600' :
-                    interviewResult.score >= 6 ? 'text-yellow-600' :
-                    'text-red-600'
+                    interviewResult.score >= 8 ? 'text-green-400' :
+                    interviewResult.score >= 6 ? 'text-yellow-400' :
+                    'text-red-400'
                   }`}>
                     {interviewResult.score}/10
                   </div>
                   <div className="flex-1">
-                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 mb-2">
+                    <div className="w-full rounded-full h-3 mb-2" style={{backgroundColor: '#374151'}}>
                       <div 
                         className={`h-3 rounded-full transition-all duration-500 ${
                           interviewResult.score >= 8 ? 'bg-green-500' :
@@ -1007,7 +1015,7 @@ export const Interview = function () {
                         style={{ width: `${(interviewResult.score / 10) * 100}%` }}
                       ></div>
                     </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                    <p className="text-sm text-gray-400">
                       {interviewResult.score >= 8 ? 'Excellent Fit' :
                        interviewResult.score >= 6 ? 'Good Fit' :
                        interviewResult.score >= 4 ? 'Fair Fit' :
@@ -1018,10 +1026,10 @@ export const Interview = function () {
               </div>
 
               {/* Reasoning Section */}
-              <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800/30 dark:to-gray-700/30 rounded-lg p-6">
-                <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-3">Detailed Assessment</h4>
+              <div className="rounded-lg p-6" style={{backgroundColor: '#2a2a2a'}}>
+                <h4 className="text-lg font-medium text-white mb-3">Detailed Assessment</h4>
                 <div className="max-h-48 overflow-y-auto">
-                  <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
+                  <p className="text-gray-300 text-sm leading-relaxed">
                     {interviewResult.reasoning}
                   </p>
                 </div>
@@ -1032,13 +1040,19 @@ export const Interview = function () {
             <div className="mt-6 flex gap-4 justify-center">
               <button
                 onClick={() => navigate("/jobs")}
-                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200"
+                className="px-6 py-3 text-white rounded-xl transition-colors duration-200"
+                style={{backgroundColor: '#ea580c'}}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#dc5500'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ea580c'}
               >
                 Back to Jobs
               </button>
               <button
                 onClick={() => setInterviewResult(null)}
-                className="px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors duration-200"
+                className="px-6 py-3 text-white rounded-xl transition-colors duration-200"
+                style={{backgroundColor: '#374151'}}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4b5563'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#374151'}
               >
                 Close Results
               </button>
@@ -1048,20 +1062,20 @@ export const Interview = function () {
 
         {/* Status Indicators */}
         <div className="mt-8 flex flex-wrap gap-4 justify-center">
-          <div className="flex items-center gap-2 px-4 py-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200 dark:border-gray-700 rounded-lg">
+          <div className="flex items-center gap-2 px-4 py-2 border rounded-lg" style={{backgroundColor: '#1a1a1a', borderColor: '#374151'}}>
             <div className={`w-3 h-3 rounded-full ${isRecording ? 'bg-green-500' : isPaused ? 'bg-yellow-500' : 'bg-gray-400'}`}></div>
-            <span className="text-sm text-gray-700 dark:text-gray-300">
+            <span className="text-sm text-gray-300">
               {isRecording ? 'Recording' : isPaused ? 'Paused' : 'Stopped'}
             </span>
           </div>
           
-          <div className="flex items-center gap-2 px-4 py-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200 dark:border-gray-700 rounded-lg">
+          <div className="flex items-center gap-2 px-4 py-2 border rounded-lg" style={{backgroundColor: '#1a1a1a', borderColor: '#374151'}}>
             <div className={`w-3 h-3 rounded-full ${
               interviewResult ? 'bg-blue-500' :
               isInterviewerSpeaking ? 'bg-blue-500' : 
               micEnabled ? 'bg-green-500' : 'bg-gray-400'
             }`}></div>
-            <span className="text-sm text-gray-700 dark:text-gray-300">
+            <span className="text-sm text-gray-300">
               {interviewResult ? 'Interview Completed' :
                isInterviewerSpeaking ? 'AI Speaking' : 
                micEnabled ? 'Mic Active' : 'Mic Disabled'}

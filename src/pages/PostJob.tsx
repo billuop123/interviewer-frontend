@@ -231,23 +231,21 @@ export const PostJob = function () {
 
   if (loadingJobTypes) {
     return (
-      <div className="fixed inset-0 w-full h-full bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-black dark:to-gray-800 overflow-auto">
-        <div className="flex items-center justify-center min-h-full">
-          <div className="text-center">
-            <div className="w-12 h-12 border-4 border-gray-300 dark:border-gray-600 border-t-gray-600 dark:border-t-gray-300 rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-lg text-gray-600 dark:text-gray-400">Loading job types...</p>
-          </div>
+      <div className="fixed inset-0 w-full h-full flex items-center justify-center" style={{background: 'linear-gradient(to bottom right, #0f0f0f, #1a1a1a, #2a2a2a)'}}>
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-gray-600 border-t-orange-500 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-lg text-gray-400">Loading job types...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="fixed inset-0 w-full h-full bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-black dark:to-gray-800 overflow-auto">
+    <div className="fixed inset-0 w-full h-full overflow-auto" style={{background: 'linear-gradient(to bottom right, #0f0f0f, #1a1a1a, #2a2a2a)'}}>
       {/* Background Animation */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-blue-200/20 to-indigo-400/20 dark:from-blue-700/20 dark:to-indigo-500/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-green-300/15 to-blue-200/15 dark:from-green-600/15 dark:to-blue-700/15 rounded-full blur-3xl animate-pulse"></div>
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-gray-600/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gray-500/10 rounded-full blur-3xl animate-pulse"></div>
       </div>
 
       <div className="relative z-10 p-6 lg:p-8 min-h-full">
@@ -256,20 +254,20 @@ export const PostJob = function () {
           <div className="mb-8">
             <button
               onClick={() => navigate(`/company/${companyId}/jobs`)}
-              className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors duration-200 mb-6"
+              className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors duration-200 mb-6"
             >
               <ArrowLeft className="w-5 h-5" />
               <span>Back to Company Jobs</span>
             </button>
             
             <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
-                <Briefcase className="w-8 h-8 text-white" />
+              <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg" style={{backgroundColor: '#2a2a2a'}}>
+                <Briefcase className="w-8 h-8" style={{color: '#ea580c'}} />
               </div>
-              <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+              <h1 className="text-3xl lg:text-4xl font-bold text-white mb-4">
                 Post a New Job
               </h1>
-              <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+              <p className="text-lg text-gray-400 max-w-2xl mx-auto">
                 Create a job posting to attract the best talent for your company.
               </p>
             </div>
@@ -277,14 +275,14 @@ export const PostJob = function () {
 
           {/* Error Messages */}
           {errors.length > 0 && (
-            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/60 rounded-xl p-4 mb-8">
+            <div className="border rounded-xl p-4 mb-8" style={{backgroundColor: '#7f1d1d33', borderColor: '#991b1b80'}}>
               <div className="flex items-start gap-3">
-                <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" style={{color: '#f87171'}} />
                 <div>
-                  <h4 className="font-semibold text-red-800 dark:text-red-300 mb-2">Please fix the following errors:</h4>
+                  <h4 className="font-semibold text-red-300 mb-2">Please fix the following errors:</h4>
                   <ul className="space-y-1">
                     {errors.map((error, index) => (
-                      <li key={index} className="text-sm text-red-700 dark:text-red-400">• {error}</li>
+                      <li key={index} className="text-sm text-red-400">• {error}</li>
                     ))}
                   </ul>
                 </div>
@@ -293,18 +291,18 @@ export const PostJob = function () {
           )}
 
           {/* Form */}
-          <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-xl border border-gray-200/60 dark:border-gray-800/60 shadow-lg p-8">
+          <div className="backdrop-blur-sm rounded-xl border shadow-lg p-8" style={{backgroundColor: '#1a1a1a', borderColor: '#374151'}}>
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Basic Information */}
               <div className="space-y-6">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                <h3 className="text-xl font-semibold text-white flex items-center gap-2">
                   <Briefcase className="w-5 h-5" />
                   Basic Information
                 </h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-semibold text-gray-300 mb-2">
                       Job Title *
                     </label>
                     <input
@@ -313,20 +311,22 @@ export const PostJob = function () {
                       value={formData.title}
                       onChange={handleInputChange}
                       placeholder="e.g., Senior Software Engineer"
-                      className="w-full px-4 py-3 bg-white/70 dark:bg-gray-800/70 border-2 border-gray-200/60 dark:border-gray-700/60 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400/20 dark:focus:ring-blue-500/20 focus:border-blue-400 dark:focus:border-blue-500 transition-all duration-300"
+                      className="w-full px-4 py-3 border-2 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 transition-all duration-300 text-base shadow-sm hover:shadow-md focus:shadow-lg"
+                      style={{backgroundColor: '#2a2a2a', borderColor: '#4b5563'}}
                       required
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-semibold text-gray-300 mb-2">
                       Job Type *
                     </label>
                     <select
                       name="jobtypeId"
                       value={formData.jobtypeId}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 bg-white/70 dark:bg-gray-800/70 border-2 border-gray-200/60 dark:border-gray-700/60 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400/20 dark:focus:ring-blue-500/20 focus:border-blue-400 dark:focus:border-blue-500 transition-all duration-300"
+                      className="w-full px-4 py-3 border-2 rounded-xl text-white focus:outline-none focus:ring-2 transition-all duration-300 text-base"
+                      style={{backgroundColor: '#2a2a2a', borderColor: '#4b5563'}}
                       required
                     >
                       <option value="">Select job type</option>
@@ -340,7 +340,7 @@ export const PostJob = function () {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-semibold text-gray-300 mb-2">
                     Job Description *
                   </label>
                   <textarea
@@ -349,7 +349,8 @@ export const PostJob = function () {
                     onChange={handleInputChange}
                     rows={6}
                     placeholder="Describe the role, responsibilities, and what makes this position exciting..."
-                    className="w-full px-4 py-3 bg-white/70 dark:bg-gray-800/70 border-2 border-gray-200/60 dark:border-gray-700/60 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400/20 dark:focus:ring-blue-500/20 focus:border-blue-400 dark:focus:border-blue-500 transition-all duration-300 resize-vertical"
+                    className="w-full px-4 py-3 border-2 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 transition-all duration-300 resize-vertical"
+                    style={{backgroundColor: '#2a2a2a', borderColor: '#4b5563'}}
                     required
                   />
                 </div>
@@ -357,14 +358,14 @@ export const PostJob = function () {
 
               {/* Location & Remote */}
               <div className="space-y-6">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                <h3 className="text-xl font-semibold text-white flex items-center gap-2">
                   <MapPin className="w-5 h-5" />
                   Location & Work Type
                 </h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-semibold text-gray-300 mb-2">
                       Location
                     </label>
                     <input
@@ -373,7 +374,8 @@ export const PostJob = function () {
                       value={formData.location}
                       onChange={handleInputChange}
                       placeholder="e.g., San Francisco, CA"
-                      className="w-full px-4 py-3 bg-white/70 dark:bg-gray-800/70 border-2 border-gray-200/60 dark:border-gray-700/60 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400/20 dark:focus:ring-blue-500/20 focus:border-blue-400 dark:focus:border-blue-500 transition-all duration-300"
+                      className="w-full px-4 py-3 border-2 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 transition-all duration-300"
+                      style={{backgroundColor: '#2a2a2a', borderColor: '#4b5563'}}
                     />
                   </div>
 
@@ -386,7 +388,7 @@ export const PostJob = function () {
                         onChange={handleInputChange}
                         className="w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
                       />
-                      <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                      <span className="text-sm font-semibold text-gray-300">
                         Remote work available
                       </span>
                     </label>
@@ -396,14 +398,14 @@ export const PostJob = function () {
 
               {/* Salary Information */}
               <div className="space-y-6">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                <h3 className="text-xl font-semibold text-white flex items-center gap-2">
                   <DollarSign className="w-5 h-5" />
                   Salary Information
                 </h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-semibold text-gray-300 mb-2">
                       Minimum Salary
                     </label>
                     <input
@@ -413,15 +415,16 @@ export const PostJob = function () {
                       onChange={handleInputChange}
                       placeholder="50000"
                       min="0"
-                      className="w-full px-4 py-3 bg-white/70 dark:bg-gray-800/70 border-2 border-gray-200/60 dark:border-gray-700/60 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400/20 dark:focus:ring-blue-500/20 focus:border-blue-400 dark:focus:border-blue-500 transition-all duration-300"
+                      className="w-full px-4 py-3 border-2 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 transition-all duration-300"
+                      style={{backgroundColor: '#2a2a2a', borderColor: '#4b5563'}}
                     />
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    <p className="text-xs text-gray-400 mt-1">
                       Must be less than maximum salary
                     </p>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-semibold text-gray-300 mb-2">
                       Maximum Salary
                     </label>
                     <input
@@ -431,22 +434,24 @@ export const PostJob = function () {
                       onChange={handleInputChange}
                       placeholder="80000"
                       min="0"
-                      className="w-full px-4 py-3 bg-white/70 dark:bg-gray-800/70 border-2 border-gray-200/60 dark:border-gray-700/60 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400/20 dark:focus:ring-blue-500/20 focus:border-blue-400 dark:focus:border-blue-500 transition-all duration-300"
+                      className="w-full px-4 py-3 border-2 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 transition-all duration-300"
+                      style={{backgroundColor: '#2a2a2a', borderColor: '#4b5563'}}
                     />
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    <p className="text-xs text-gray-400 mt-1">
                       Must be greater than minimum salary
                     </p>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-semibold text-gray-300 mb-2">
                       Currency
                     </label>
                     <select
                       name="salarycurrency"
                       value={formData.salarycurrency}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 bg-white/70 dark:bg-gray-800/70 border-2 border-gray-200/60 dark:border-gray-700/60 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400/20 dark:focus:ring-blue-500/20 focus:border-blue-400 dark:focus:border-blue-500 transition-all duration-300"
+                      className="w-full px-4 py-3 border-2 rounded-xl text-white focus:outline-none focus:ring-2 transition-all duration-300"
+                      style={{backgroundColor: '#2a2a2a', borderColor: '#4b5563'}}
                     >
                       <option value="USD">USD</option>
                       <option value="EUR">EUR</option>
@@ -459,21 +464,22 @@ export const PostJob = function () {
 
               {/* Requirements & Skills */}
               <div className="space-y-6">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                <h3 className="text-xl font-semibold text-white flex items-center gap-2">
                   <Users className="w-5 h-5" />
                   Requirements & Skills
                 </h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-semibold text-gray-300 mb-2">
                       Experience Required (years)
                     </label>
                     <select
                       name="experiencerequired"
                       value={formData.experiencerequired}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 bg-white/70 dark:bg-gray-800/70 border-2 border-gray-200/60 dark:border-gray-700/60 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400/20 dark:focus:ring-blue-500/20 focus:border-blue-400 dark:focus:border-blue-500 transition-all duration-300"
+                      className="w-full px-4 py-3 border-2 rounded-xl text-white focus:outline-none focus:ring-2 transition-all duration-300"
+                      style={{backgroundColor: '#2a2a2a', borderColor: '#4b5563'}}
                     >
                       <option value="0">Entry Level (0-1 years)</option>
                       <option value="2">Junior (2-3 years)</option>
@@ -483,14 +489,15 @@ export const PostJob = function () {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-semibold text-gray-300 mb-2">
                       Education Level
                     </label>
                     <select
                       name="educationlevel"
                       value={formData.educationlevel}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 bg-white/70 dark:bg-gray-800/70 border-2 border-gray-200/60 dark:border-gray-700/60 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400/20 dark:focus:ring-blue-500/20 focus:border-blue-400 dark:focus:border-blue-500 transition-all duration-300"
+                      className="w-full px-4 py-3 border-2 rounded-xl text-white focus:outline-none focus:ring-2 transition-all duration-300"
+                      style={{backgroundColor: '#2a2a2a', borderColor: '#4b5563'}}
                     >
                       <option value="">No specific requirement</option>
                       <option value="High School">High School</option>
@@ -503,7 +510,7 @@ export const PostJob = function () {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-semibold text-gray-300 mb-2">
                     Required Skills
                   </label>
                   
@@ -515,12 +522,16 @@ export const PostJob = function () {
                       onChange={(e) => setSkillInput(e.target.value)}
                       onKeyPress={handleSkillKeyPress}
                       placeholder="Enter a skill and press Enter or click Add"
-                      className="flex-1 px-4 py-3 bg-white/70 dark:bg-gray-800/70 border-2 border-gray-200/60 dark:border-gray-700/60 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400/20 dark:focus:ring-blue-500/20 focus:border-blue-400 dark:focus:border-blue-500 transition-all duration-300"
+                      className="flex-1 px-4 py-3 border-2 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 transition-all duration-300"
+                      style={{backgroundColor: '#2a2a2a', borderColor: '#4b5563'}}
                     />
                     <button
                       type="button"
                       onClick={addSkill}
-                      className="px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors duration-200 flex items-center gap-2"
+                      className="px-4 py-3 text-white rounded-xl font-medium transition-colors duration-200 flex items-center gap-2"
+                      style={{backgroundColor: '#ea580c'}}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#dc5500'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ea580c'}
                     >
                       <Plus className="w-4 h-4" />
                       Add
@@ -533,13 +544,15 @@ export const PostJob = function () {
                       {formData.skills.map((skill, index) => (
                         <span
                           key={index}
-                          className="inline-flex items-center gap-2 px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded-full text-sm font-medium"
+                          className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium border"
+                          style={{backgroundColor: '#ea580c20', color: '#ea580c', borderColor: '#ea580c40'}}
                         >
                           {skill}
                           <button
                             type="button"
                             onClick={() => removeSkill(skill)}
-                            className="hover:bg-blue-200 dark:hover:bg-blue-900/50 rounded-full p-0.5 transition-colors duration-200"
+                            className="rounded-full p-0.5 transition-colors duration-200"
+                            style={{backgroundColor: 'transparent'}}
                           >
                             <X className="w-3 h-3" />
                           </button>
@@ -548,13 +561,13 @@ export const PostJob = function () {
                     </div>
                   )}
                   
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                  <p className="text-xs text-gray-400 mt-2">
                     Add skills one by one. Press Enter or click Add to add a skill.
                   </p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-semibold text-gray-300 mb-2">
                     Job Requirements
                   </label>
                   <textarea
@@ -563,12 +576,13 @@ export const PostJob = function () {
                     onChange={handleInputChange}
                     rows={4}
                     placeholder="List specific requirements, certifications, or qualifications needed..."
-                    className="w-full px-4 py-3 bg-white/70 dark:bg-gray-800/70 border-2 border-gray-200/60 dark:border-gray-700/60 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400/20 dark:focus:ring-blue-500/20 focus:border-blue-400 dark:focus:border-blue-500 transition-all duration-300 resize-vertical"
+                    className="w-full px-4 py-3 border-2 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 transition-all duration-300 resize-vertical"
+                    style={{backgroundColor: '#2a2a2a', borderColor: '#4b5563'}}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-semibold text-gray-300 mb-2">
                     Key Responsibilities
                   </label>
                   <textarea
@@ -577,12 +591,13 @@ export const PostJob = function () {
                     onChange={handleInputChange}
                     rows={4}
                     placeholder="Describe the main duties and responsibilities..."
-                    className="w-full px-4 py-3 bg-white/70 dark:bg-gray-800/70 border-2 border-gray-200/60 dark:border-gray-700/60 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400/20 dark:focus:ring-blue-500/20 focus:border-blue-400 dark:focus:border-blue-500 transition-all duration-300 resize-vertical"
+                    className="w-full px-4 py-3 border-2 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 transition-all duration-300 resize-vertical"
+                    style={{backgroundColor: '#2a2a2a', borderColor: '#4b5563'}}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-semibold text-gray-300 mb-2">
                     Benefits & Perks
                   </label>
                   <textarea
@@ -591,21 +606,22 @@ export const PostJob = function () {
                     onChange={handleInputChange}
                     rows={4}
                     placeholder="List benefits, perks, and what makes your company a great place to work..."
-                    className="w-full px-4 py-3 bg-white/70 dark:bg-gray-800/70 border-2 border-gray-200/60 dark:border-gray-700/60 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400/20 dark:focus:ring-blue-500/20 focus:border-blue-400 dark:focus:border-blue-500 transition-all duration-300 resize-vertical"
+                    className="w-full px-4 py-3 border-2 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 transition-all duration-300 resize-vertical"
+                    style={{backgroundColor: '#2a2a2a', borderColor: '#4b5563'}}
                   />
                 </div>
               </div>
 
               {/* Application Details */}
               <div className="space-y-6">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                <h3 className="text-xl font-semibold text-white flex items-center gap-2">
                   <Mail className="w-5 h-5" />
                   Application Details
                 </h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-semibold text-gray-300 mb-2">
                       Contact Email *
                     </label>
                     <input
@@ -614,13 +630,14 @@ export const PostJob = function () {
                       value={formData.contactemail}
                       onChange={handleInputChange}
                       placeholder="hr@company.com"
-                      className="w-full px-4 py-3 bg-white/70 dark:bg-gray-800/70 border-2 border-gray-200/60 dark:border-gray-700/60 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400/20 dark:focus:ring-blue-500/20 focus:border-blue-400 dark:focus:border-blue-500 transition-all duration-300"
+                      className="w-full px-4 py-3 border-2 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 transition-all duration-300"
+                      style={{backgroundColor: '#2a2a2a', borderColor: '#4b5563'}}
                       required
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-semibold text-gray-300 mb-2">
                       Application Deadline
                     </label>
                     <input
@@ -629,16 +646,17 @@ export const PostJob = function () {
                       value={formData.applicationdeadline}
                       onChange={handleInputChange}
                       min={new Date().toISOString().split('T')[0]}
-                      className="w-full px-4 py-3 bg-white/70 dark:bg-gray-800/70 border-2 border-gray-200/60 dark:border-gray-700/60 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400/20 dark:focus:ring-blue-500/20 focus:border-blue-400 dark:focus:border-blue-500 transition-all duration-300"
+                      className="w-full px-4 py-3 border-2 rounded-xl text-white focus:outline-none focus:ring-2 transition-all duration-300"
+                      style={{backgroundColor: '#2a2a2a', borderColor: '#4b5563'}}
                     />
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    <p className="text-xs text-gray-400 mt-1">
                       Must be in the future
                     </p>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-semibold text-gray-300 mb-2">
                     Application URL *
                   </label>
                   <input
@@ -647,7 +665,8 @@ export const PostJob = function () {
                     value={formData.applicationurl}
                     onChange={handleInputChange}
                     placeholder="https://company.com/careers/apply"
-                    className="w-full px-4 py-3 bg-white/70 dark:bg-gray-800/70 border-2 border-gray-200/60 dark:border-gray-700/60 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400/20 dark:focus:ring-blue-500/20 focus:border-blue-400 dark:focus:border-blue-500 transition-all duration-300"
+                    className="w-full px-4 py-3 border-2 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 transition-all duration-300"
+                    style={{backgroundColor: '#2a2a2a', borderColor: '#4b5563'}}
                     required
                   />
                 </div>
@@ -661,7 +680,7 @@ export const PostJob = function () {
                       onChange={handleInputChange}
                       className="w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
                     />
-                    <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                    <span className="text-sm font-semibold text-gray-300 flex items-center gap-2">
                       <Star className="w-4 h-4" />
                       Feature this job (highlighted listing)
                     </span>
@@ -674,7 +693,10 @@ export const PostJob = function () {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 disabled:from-gray-400 disabled:to-gray-500 text-white rounded-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:transform-none disabled:cursor-not-allowed"
+                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3 text-white rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:transform-none disabled:cursor-not-allowed"
+                  style={{backgroundColor: '#ea580c', boxShadow: '0 0 0 2px rgba(234, 88, 12, 0.2)'}}
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#dc5500')}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#ea580c')}
                 >
                   {loading ? (
                     <>
@@ -692,7 +714,10 @@ export const PostJob = function () {
                 <button
                   type="button"
                   onClick={() => navigate(`/company/${companyId}/jobs`)}
-                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gray-500 hover:bg-gray-600 text-white rounded-lg font-semibold transition-colors duration-200"
+                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3 text-white rounded-xl font-semibold transition-colors duration-200"
+                  style={{backgroundColor: '#374151'}}
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#4b5563')}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#374151')}
                 >
                   <ArrowLeft className="w-5 h-5" />
                   Cancel
